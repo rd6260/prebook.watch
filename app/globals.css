@@ -3,6 +3,22 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Light theme */
+  --bg-dark: hsl(180 57% 85%);
+  --bg: hsl(180 88% 90%);
+  --bg-light: hsl(180 100% 95%);
+  --text: hsl(185 100% 1%);
+  --text-muted: hsl(181 100% 10%);
+  --highlight: hsl(180 100% 89%);
+  --border: hsl(181 54% 37%);
+  --border-muted: hsl(180 38% 50%);
+  --primary: hsl(181 100% 9%);
+  --secondary: hsl(353 44% 32%);
+  --danger: hsl(8 36% 41%);
+  --warning: hsl(52 58% 28%);
+  --success: hsl(152 45% 31%);
+  --info: hsl(217 38% 43%);
 }
 
 @theme inline {
