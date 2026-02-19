@@ -20,7 +20,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 
 export const metadata: Metadata = {
-  title: "Prebook platoon One releases",
+  title: "Prebook | Platoon One releases",
   description: "Book Platoon One movie tickets at cinemas near you",
 };
 

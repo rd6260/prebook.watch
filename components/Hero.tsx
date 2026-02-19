@@ -4,7 +4,7 @@ export default function Hero() {
       {/* Background Image */}
       <div className="absolute inset-0">
         <picture>
-          <source media="(max-width: 768px)" srcSet="/movie_posters/bindusagar_poster.jpg" />
+          <source media="(max-width: 768px)" srcSet="https://m.media-amazon.com/images/M/MV5BNTM3OTVkZWMtMGE0My00OTY3LWFhZmEtNzA4YjkyYjQ2ZDg4XkEyXkFqcGc@._V1_.jpg" />
           <img
             src="/movie_posters/bindusagar_banner.jpg"
             alt="Bindusagar (2025)"
