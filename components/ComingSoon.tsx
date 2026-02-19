@@ -1,13 +1,13 @@
 const upcoming = [
   {
-    title: "THE CREATOR",
-    releasing: "Releasing 15 OCT",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDY19IOadknPl49ImIQs84BcCx7yVl6o6HuUlR1auARfyIn4e8sqw6PRg11LptWMKW82copHq4ukJUvz5Y3JBTL_VUWghroharCeusJNZ4AmMAjKmpHqW19aO9C7uTfDt7SVMMetpSViYyht97pOxoUDbNTHQYeHt1j5rLnUc0dQ2UDntFcEQ_EVToHP1sFJ50fa8eJNQ-71LYtA1OktGNBDR63kiKda5C3GVRiydD9E8KtwqGUFKZ-qncq4FVAzWLYhQ9H4fYqWqs",
+    title: "Aapke Aa Jane Se",
+    releasing: "",
+    img: "https://platoon.one/images/production/new/aapke-aa-jane-se.jpg",
   },
   {
-    title: "GLADIATOR II",
-    releasing: "Releasing 22 OCT",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBSJhZKuhfnPDn0Ccxr_tzoGuL4CkK7DHBF4WBYJr2Z9L3Hxsj__fLBU5UdUsRDXfxAOI_-pkK2DqaYX6JoUrpAZvtbSOmzF_tBZIIYQwX9Kvs7om4fmdeFWynrZhGqJ51JbQoEKdc1f7YYl5uCzBq4Ac0e94mlWeXUOVrpyrMtmM9lLhUVaSDmm1DLkCtff01DnDQitG35XttfuT4gOzwUnMfxLhG69E8cAu2_QAYdaLOQ4ySOxwkHKJVKr8z1sQnFkPzuXNLCUbs",
+    title: "Aakhri Safar",
+    releasing: "",
+    img: "https://platoon.one/images/production/new/aakhri-safar.jpg",
   },
 ];
 
