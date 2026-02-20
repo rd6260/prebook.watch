@@ -43,7 +43,7 @@ export default function NowShowing() {
           href="#"
           className="text-sm font-bold text-[hsl(181_100%_9%)] flex items-center gap-1"
         >
-          <span className="hover:underline">View All{" "}</span>
+          <span className="hover:underline">View All </span>
           <span className="material-symbols-outlined text-base">arrow_forward</span>
         </a>
       </div>
@@ -52,13 +52,18 @@ export default function NowShowing() {
         {movies.map((movie) => (
           <div key={movie.title} className="group cursor-pointer">
             <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg mb-4">
+
+              {/* Mobile: entire image is a link to /select-city */}
+              <a href="/select-city" className="block md:hidden w-full h-full absolute inset-0 z-10" aria-label={`Book ${movie.title}`} />
+
               <img
                 src={movie.img}
                 alt={movie.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-[hsl(181_100%_9%/0.7)] opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+
+              {/* Hover Overlay — hidden on mobile, visible on md+ */}
+              <div className="absolute inset-0 bg-[hsl(181_100%_9%/0.7)] opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 hidden md:flex">
                 <a href="/select-city" className="w-full text-center py-2 bg-white text-[hsl(181_100%_9%)] rounded font-bold text-sm mb-2 hover:bg-slate-100 transition-colors">
                   Book Now
                 </a>
@@ -66,9 +71,10 @@ export default function NowShowing() {
                   Details
                 </button>
               </div>
+
               {/* Rating badge */}
               {movie.rating_label && (
-                <div className="absolute top-2 right-2 px-2 py-1 bg-[hsl(181_100%_9%)] text-white text-[10px] font-black rounded">
+                <div className="absolute top-2 right-2 px-2 py-1 bg-[hsl(181_100%_9%)] text-white text-[10px] font-black rounded z-20">
                   {movie.rating_label}
                 </div>
               )}

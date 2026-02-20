@@ -97,7 +97,7 @@ export default function SelectCityPage() {
               {filtered.map((city) => (
                 <button
                   key={city.name}
-                  onClick={() => setSelected(city.name)}
+                  onClick={() => { setSelected(city.name); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                   className={`group flex flex-col items-center p-6 rounded-2xl border transition-all duration-300 ${selected === city.name
                     ? "border-[hsl(181_100%_9%)] bg-[hsl(181_100%_9%)] text-white shadow-xl shadow-[hsl(181_100%_9%/0.2)]"
                     : "bg-white border-[hsl(181_100%_9%/0.06)] hover:border-[hsl(181_100%_9%)] hover:shadow-xl hover:shadow-[hsl(181_100%_9%/0.1)]"
