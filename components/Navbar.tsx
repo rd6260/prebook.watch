@@ -10,7 +10,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
               <span className="material-symbols-outlined text-4xl font-bold">movie_filter</span>
               <a href="/">
-                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook.watch</h1>
+                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
               </a>
             </div>
             <div className="hidden md:flex flex-1 max-w-md">

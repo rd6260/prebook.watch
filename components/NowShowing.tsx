@@ -1,6 +1,6 @@
 const movies = [
   {
-    title: "Oppenheimer",
+    title: "Bayaan",
     genre: "Thriller/Drama",
     rating: "8.3",
     rating_label: "14A",
