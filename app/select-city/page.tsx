@@ -65,7 +65,7 @@ export default function SelectCityPage() {
 
         {/* CTA Banner if city selected */}
         {selected && (
-          <div className="w-fit mb-16 p-6 rounded-2xl bg-white border border-[hsl(181_54%_37%/0.15)] flex flex-col sm:flex-row items-center justify-between gap-8 shadow-lg">
+          <div className="w-full sm:w-fit mb-16 p-6 rounded-2xl bg-white border border-[hsl(181_54%_37%/0.15)] flex flex-col sm:flex-row items-center justify-between gap-8 shadow-lg">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-3xl text-[hsl(181_100%_9%)]">location_on</span>
               <div>
@@ -74,7 +74,7 @@ export default function SelectCityPage() {
               </div>
             </div>
             <button className="px-8 py-3 bg-[hsl(181_100%_9%)] text-white font-bold rounded-xl hover:bg-[hsl(181_100%_12%)] transition-colors shadow-lg shadow-[hsl(181_100%_9%/0.2)]">
-              Continue to Movies →
+              Continue →
             </button>
           </div>
         )}
