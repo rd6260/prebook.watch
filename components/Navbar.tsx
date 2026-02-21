@@ -8,10 +8,11 @@ export default function Navbar() {
           {/* Logo & Search */}
           <div className="flex items-center gap-8 flex-1">
             <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
-              <span className="material-symbols-outlined text-4xl font-bold">movie_filter</span>
-              <a href="/">
-                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
-              </a>
+              <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(181_100%_9%/0.06)] hover:bg-[hsl(181_100%_9%/0.12)] transition-all">
+                <span className="material-symbols-outlined text-xl">location_on</span>
+                <span className="text-xs font-bold uppercase tracking-wider sm:block">Bhubaneswar, BBSR</span>
+                <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
+              </button>
             </div>
             <div className="hidden md:flex flex-1 max-w-md">
               <div className="relative w-full">
@@ -41,10 +42,6 @@ export default function Navbar() {
               ))}
             </nav>
             <div className="flex items-center gap-3 border-l border-[hsl(181_54%_37%/0.15)] pl-6 ml-2">
-              <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(181_100%_9%/0.06)] hover:bg-[hsl(181_100%_9%/0.12)] transition-all">
-                <span className="material-symbols-outlined text-xl">location_on</span>
-                <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Bhubaneswar, BBSR</span>
-              </button>
               <div className="h-10 w-10 rounded-full bg-[hsl(181_100%_9%)] flex items-center justify-center text-white cursor-pointer overflow-hidden ring-2 ring-[hsl(181_100%_9%/0.2)]">
                 <img
                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=aperson"
