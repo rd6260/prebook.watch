@@ -1,171 +1,212 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 
-export default function Hero() {
-  const [trailerOpen, setTrailerOpen] = useState(false);
+interface HeroProps {
+  onBookNow?: () => void;
+  onScrollToCinemaList?: () => void;
+}
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (trailerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
+  const [muted, setMuted] = useState(true);
+  const mobileIframeRef = useRef<HTMLIFrameElement>(null);
+  const desktopIframeRef = useRef<HTMLIFrameElement>(null);
+
+  const toggleMute = () => {
+    const cmd = muted
+      ? '{"event":"command","func":"unMute","args":""}'
+      : '{"event":"command","func":"mute","args":""}';
+    mobileIframeRef.current?.contentWindow?.postMessage(cmd, "*");
+    desktopIframeRef.current?.contentWindow?.postMessage(cmd, "*");
+    setMuted((prev) => !prev);
+  };
+
+  const handleBookNow = (e: React.MouseEvent) => {
+    if (onBookNow) {
+      e.preventDefault();
+      onBookNow();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [trailerOpen]);
-
-  // Close on Escape key
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setTrailerOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    // else falls through to the href="/select-city" anchor default
+  };
 
   return (
-    <>
-      <section className="relative w-full mb-12">
-        <div className="relative rounded-2xl overflow-hidden bg-[hsl(181_100%_6%)]">
-          <div className="flex flex-col md:flex-row md:min-h-[520px]">
+    <section className="relative w-full mb-12">
 
-            {/* Poster */}
-            <div className="relative w-full md:w-[340px] md:flex-shrink-0 order-first md:order-last">
-              <div className="relative w-full h-[280px] md:h-full overflow-hidden">
-                <img
-                  src="/movie_posters/bindusagar_poster.webp"
-                  alt="Bindusagar (2025)"
-                  className="w-full h-full object-cover object-top md:object-center transition-transform duration-700 hover:scale-105"
-                />
-                {/* Mobile bottom fade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[hsl(181_100%_6%)] via-[hsl(181_100%_6%/0.3)] to-transparent md:hidden" />
-                {/* Desktop left fade */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[hsl(181_100%_6%)] via-[hsl(181_100%_6%/0.15)] to-transparent hidden md:block" />
-              </div>
-            </div>
+      {/* ─────────────────────────────────────────────
+          MOBILE LAYOUT  (< md)
+          3:4 portrait card — video fills full height,
+          title + genres + description + CTA overlaid at bottom (centered).
+      ───────────────────────────────────────────── */}
+      <div className="md:hidden text-white">
 
-            {/* Content */}
-            <div className="relative flex flex-col justify-center px-6 pb-8 pt-2 md:pt-10 md:px-12 md:pb-12 text-white flex-1 z-10">
-              {/* Badge row */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="px-2 py-1 rounded bg-yellow-500 text-[hsl(181_100%_6%)] font-bold text-xs tracking-widest">
-                  IMDb
-                </span>
-                <span className="flex items-center gap-1 text-sm font-medium">
-                  <span className="material-symbols-outlined text-yellow-500 text-base">star</span>
-                  8.9 Rating
-                </span>
-                <span className="text-xs text-slate-400 border border-slate-700 px-2 py-0.5 rounded">
-                  2025
-                </span>
-              </div>
-
-              {/* Title */}
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight tracking-tight">
-                Bindusagar
-              </h2>
-
-              {/* Description */}
-              <p className="text-sm sm:text-base text-slate-300 mb-8 font-light leading-relaxed max-w-md line-clamp-4 md:line-clamp-none">
-                When a young woman's quest to discover her roots intersects with a grieving father's
-                journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a
-                  href="/select-city"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold hover:bg-slate-100 transition-all shadow-xl shadow-black/30 text-sm sm:text-base"
-                >
-                  <span className="material-symbols-outlined text-lg">confirmation_number</span>
-                  Be the first one to watch. Book Now!
-                </a>
-
-                <button
-                  onClick={() => setTrailerOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl font-bold hover:bg-white/20 active:scale-95 transition-all text-sm sm:text-base cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-lg">play_circle</span>
-                  Watch Trailer
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Teal glow */}
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-teal-900/30 blur-3xl pointer-events-none -z-0" />
-        </div>
-      </section>
-
-      {/* ── TRAILER MODAL ── */}
-      {trailerOpen && (
+        {/* 3:4 Card — large corner radius */}
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Bindusagar Trailer"
+          className="relative overflow-hidden shadow-2xl shadow-black/60"
+          style={{ aspectRatio: "3/4", borderRadius: "32px" }}
         >
-          {/* Backdrop — click to close */}
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setTrailerOpen(false)}
-          />
+          {/* Full-fill video */}
+          <div className="absolute inset-0 w-full h-full bg-black">
+            <iframe
+              ref={mobileIframeRef}
+              className="absolute pointer-events-none"
+              src="https://www.youtube.com/embed/dVZC20xQmvU?autoplay=1&mute=1&loop=1&controls=0&playlist=dVZC20xQmvU&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+              title="Bindusagar Teaser"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "177.78%",
+                height: "100%",
+              }}
+            />
+          </div>
 
-          {/* Modal panel */}
-          <div className="relative w-full max-w-3xl z-10 rounded-2xl overflow-hidden shadow-2xl shadow-black/60 bg-[hsl(181_100%_5%)]">
+          {/* "Releasing Today" badge — top right */}
+          {/* 
+          <div className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur-sm border border-white/20 text-white text-[10px] font-semibold tracking-widest px-2.5 py-1 rounded-full">
+            Releasing Today
+          </div>
+          */}
 
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-teal-400 text-lg">movie</span>
-                <span className="text-white font-semibold text-sm tracking-wide">
-                  Bindusagar — Official Trailer
-                </span>
-              </div>
-              <button
-                onClick={() => setTrailerOpen(false)}
-                className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white"
-                aria-label="Close trailer"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
+          {/* Mute button — bottom right, tiny */}
+          <button
+            onClick={toggleMute}
+            className="absolute bottom-3 right-3 z-20 flex items-center justify-center w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white active:scale-90 transition-all"
+            aria-label={muted ? "Unmute" : "Mute"}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
+              {muted ? "volume_off" : "volume_up"}
+            </span>
+          </button>
+
+          {/* Bottom overlay */}
+          <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 pt-24 bg-gradient-to-t from-black via-black/70 to-transparent flex flex-col items-center text-center">
+            <h2 className="text-3xl font-black tracking-tight leading-none mb-2 drop-shadow-lg">
+              Bindusagar
+            </h2>
+            <div className="flex flex-wrap justify-center gap-2 mb-2.5">
+              <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
+                Drama
+              </span>
+              <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
+                Family
+              </span>
             </div>
-
-            {/* YouTube embed — 16:9 aspect ratio */}
-            <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
-              <iframe
-                className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/dVZC20xQmvU?autoplay=1&rel=0&modestbranding=1"
-                title="Bindusagar Official Trailer"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            {/* Modal footer CTA */}
-            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-white/10">
-              <p className="text-slate-400 text-xs hidden sm:block">
-                Press{" "}
-                <kbd className="bg-white/10 text-white px-1.5 py-0.5 rounded text-xs font-mono">
-                  Esc
-                </kbd>{" "}
-                to close
-              </p>
-              <a
-                href="/select-city"
-                onClick={() => setTrailerOpen(false)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold hover:bg-slate-100 transition-all text-sm shadow-lg shadow-black/20 ml-auto"
-              >
-                <span className="material-symbols-outlined text-base">confirmation_number</span>
-                Book Now
-              </a>
-            </div>
+            <p className="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-4">
+              When a young woman's quest to discover her roots intersects with a grieving father's
+              journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
+            </p>
+            {/* Mobile: scroll down to CinemaList */}
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); onScrollToCinemaList?.(); }}
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold text-sm hover:bg-slate-100 transition-all shadow-lg shadow-black/30"
+            >
+              <span className="material-symbols-outlined text-base">confirmation_number</span>
+              Be the first one to watch. Book Now!
+            </a>
           </div>
         </div>
-      )}
-    </>
+      </div>
+
+
+      {/* ─────────────────────────────────────────────
+          DESKTOP LAYOUT  (>= md)
+          Cinematic full-bleed video, content bottom-left
+      ───────────────────────────────────────────── */}
+      <div
+        className="hidden md:block relative rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/60"
+        style={{ minHeight: "520px" }}
+      >
+        {/* Full-bleed video */}
+        <div className="absolute inset-0 w-full h-full">
+          <iframe
+            ref={desktopIframeRef}
+            className="pointer-events-none"
+            src="https://www.youtube.com/embed/dVZC20xQmvU?autoplay=1&mute=1&loop=1&controls=0&playlist=dVZC20xQmvU&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+            title="Bindusagar Teaser"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </div>
+
+        {/* Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+
+        {/* "Releasing Today" badge top-right */}
+
+        {/* 
+        <div className="absolute top-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold tracking-widest px-3 py-1.5 rounded-full z-10">
+          Releasing Today
+        </div>
+        */}
+
+        {/* Mute button bottom-right */}
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-5 right-5 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/80 active:scale-90 transition-all"
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          <span className="material-symbols-outlined text-base">
+            {muted ? "volume_off" : "volume_up"}
+          </span>
+        </button>
+
+        {/* Content — bottom-left */}
+        <div
+          className="relative z-10 flex flex-col justify-end h-full px-12 pb-12 pt-20 text-white"
+          style={{ minHeight: "520px" }}
+        >
+          {/* IMDb + year */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="px-2 py-1 rounded bg-yellow-500 text-black font-bold text-[10px] tracking-widest">IMDb</span>
+            <span className="flex items-center gap-1 text-sm font-medium">
+              <span className="material-symbols-outlined text-yellow-500 text-base">star</span>
+              8.9 Rating
+            </span>
+            <span className="text-xs text-slate-400 border border-slate-600 px-2 py-0.5 rounded-full">2025</span>
+          </div>
+
+          {/* Title */}
+          <h2 className="text-6xl xl:text-7xl font-black tracking-tight leading-none mb-4 drop-shadow-2xl">
+            Bindusagar
+          </h2>
+
+          {/* Genre pills */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Spiritual Drama</span>
+            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Family</span>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-slate-300 leading-relaxed mb-7 max-w-sm font-light">
+            When a young woman's quest to discover her roots intersects with a grieving father's
+            journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
+          </p>
+
+          {/* CTA — uses onBookNow on desktop to redirect to /select-cinema with stored city */}
+          <a
+            href="/select-city"
+            onClick={handleBookNow}
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold hover:bg-slate-100 transition-all shadow-xl shadow-black/40 text-sm w-fit"
+          >
+            <span className="material-symbols-outlined text-base">confirmation_number</span>
+            Be the first one to watch. Book Now!
+          </a>
+        </div>
+      </div>
+
+    </section>
   );
 }

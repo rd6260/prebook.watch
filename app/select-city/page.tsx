@@ -2,33 +2,107 @@
 
 import Navbar from "@/components/Navbar";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const cities = [
-  { name: "Bhubaneswar", icon: "temple_hindu" },
-  { name: "Mumbai", icon: "apartment" },
-  { name: "Bangalore", icon: "developer_board" },
-  { name: "Hyderabad", icon: "fort" },
-  { name: "Pune", icon: "school" },
-  { name: "Gurgaon", icon: "corporate_fare" },
-  { name: "Surat", icon: "diamond" },
-  { name: "Goa", icon: "beach_access" },
-  { name: "Cuttack", icon: "castle" },
-  { name: "Sambalpur", icon: "water" },
+  {
+    name: "Bhubaneswar",
+    icon: "temple_hindu",
+    cinema: [
+      "Cinepolis: Nexus Esplande, Bhubaneswar",
+      "PVR Utkal Kanika Galleria, Bhubaneswar",
+      "INOX DN Regalia Mall",
+      "INOX BMC Bhawani Mall",
+      "INOX Symphony Mall"
+    ]
+  },
+  {
+    name: "Mumbai",
+    icon: "apartment",
+    cinema: [
+      "INOX RCity Ghatkopar",
+      "Cinepolis Seawoods Navi Mumbai",
+      "Cinepolis Viviana Thane"
+    ]
+  },
+  {
+    name: "Bengaluru",
+    icon: "developer_board",
+    cinema: [
+      "Cinepolis Shantiniketan",
+      "PVR Phoenix Whitefield",
+      "INOX Megaplex Mall of Asia"
+    ]
+  },
+  {
+    name: "Hyderabad",
+    icon: "fort",
+    cinema: [
+      "PVR Central Mall",
+      "PVR Prism Mall"
+    ]
+  },
+  {
+    name: "Pune",
+    icon: "school",
+    cinema: [
+      "Cinepolis Seasons Mall",
+      "INOX Phoenix Marketcity"
+    ]
+  },
+  {
+    name: "Gurgaon",
+    icon: "corporate_fare",
+    cinema: [
+      "PVR MGF Gurgaon"
+    ]
+  },
+  {
+    name: "Surat",
+    icon: "diamond",
+    cinema: [
+      "PVR Rahul Raj Mall"
+    ]
+  },
+  {
+    name: "Goa",
+    icon: "beach_access",
+    cinema: []
+  },
+  {
+    name: "Cuttack",
+    icon: "castle",
+    cinema: [
+      "INOX Cuttack SGBL Square Mall"
+    ]
+  },
+  {
+    name: "Sambalpur",
+    icon: "water",
+    cinema: [
+      "The Phoenix Cinema: City Centre Mall"
+    ]
+  }
 ];
 
 export default function SelectCityPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const router = useRouter();
 
   const filtered = cities.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleContinue = () => {
+    if (!selected) return;
+    router.push(`/select-cinema?city=${encodeURIComponent(selected)}`);
+  };
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[hsl(180_88%_90%)] text-[hsl(185_100%_1%)] font-[Be_Vietnam_Pro,sans-serif]">
       <Navbar />
 
-      {/* Main */}
       <main className="flex-1 flex flex-col items-center py-12 px-6 md:px-20 max-w-7xl mx-auto w-full">
 
         {/* Hero Text */}
@@ -73,7 +147,10 @@ export default function SelectCityPage() {
                 <p className="text-xl font-black text-[hsl(181_100%_9%)]">{selected}</p>
               </div>
             </div>
-            <button className="px-8 py-3 bg-[hsl(181_100%_9%)] text-white font-bold rounded-xl hover:bg-[hsl(181_100%_12%)] transition-colors shadow-lg shadow-[hsl(181_100%_9%/0.2)]">
+            <button
+              onClick={handleContinue}
+              className="px-8 py-3 bg-[hsl(181_100%_9%)] text-white font-bold rounded-xl hover:bg-[hsl(181_100%_12%)] transition-colors shadow-lg shadow-[hsl(181_100%_9%/0.2)]"
+            >
               Continue →
             </button>
           </div>
@@ -97,7 +174,7 @@ export default function SelectCityPage() {
               {filtered.map((city) => (
                 <button
                   key={city.name}
-                  onClick={() => { setSelected(city.name); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  onClick={() => { setSelected(city.name); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   className={`group flex flex-col items-center p-6 rounded-2xl border transition-all duration-300 ${selected === city.name
                     ? "border-[hsl(181_100%_9%)] bg-[hsl(181_100%_9%)] text-white shadow-xl shadow-[hsl(181_100%_9%/0.2)]"
                     : "bg-white border-[hsl(181_100%_9%/0.06)] hover:border-[hsl(181_100%_9%)] hover:shadow-xl hover:shadow-[hsl(181_100%_9%/0.1)]"
@@ -111,10 +188,7 @@ export default function SelectCityPage() {
                   >
                     <span className="material-symbols-outlined text-4xl">{city.icon}</span>
                   </div>
-                  <span
-                    className={`font-bold ${selected === city.name ? "text-white" : "text-[hsl(181_100%_9%)]"
-                      }`}
-                  >
+                  <span className={`font-bold ${selected === city.name ? "text-white" : "text-[hsl(181_100%_9%)]"}`}>
                     {city.name}
                   </span>
                   {selected === city.name && (
@@ -127,7 +201,6 @@ export default function SelectCityPage() {
             </div>
           )}
         </div>
-
 
         {/* Can't find city banner */}
         <div className="w-full mt-20 p-8 rounded-3xl bg-[hsl(181_100%_9%)] text-white flex flex-col md:flex-row items-center gap-10 overflow-hidden relative">
