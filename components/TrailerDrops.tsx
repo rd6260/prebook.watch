@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-type Trailer = {
+type Reel = {
   id: string;
   title: string;
   genre: string;
@@ -11,55 +9,61 @@ type Trailer = {
   duration: string;
   badge?: string;
   badgeColor?: string;
-  youtubeId?: string;
+  instagramUrl: string;
 };
 
-const trailers: Trailer[] = [
+const reels: Reel[] = [
   {
     id: "1",
-    title: "Bindusagar",
-    genre: "Drama · Action",
-    releaseLabel: "Now Showing",
-    poster: "/movie_posters/bindusagar_poster.webp",
-    duration: "2m 45s",
-    badge: "New",
+    title: "Teaser Drop",
+    genre: "",
+    releaseLabel: "",
+    poster: "/reel_thumbnails/reel-01.jpg",
+    duration: "",
+    badge: "",
     badgeColor: "bg-teal-400 text-[hsl(181_100%_6%)]",
+    instagramUrl: "https://www.instagram.com/reel/DUkVpbFEVH6/?igsh=MjV1azA5cTFmdWpx",
   },
   {
     id: "2",
-    title: "TOXIC",
-    genre: "Action · Thriller",
-    releaseLabel: "Mar 2026",
-    poster: "/movie_posters/toxic_poster.webp",
-    duration: "3m 10s",
-    badge: "Hot",
+    title: "Bhola Shankar",
+    genre: "",
+    releaseLabel: "",
+    poster: "/reel_thumbnails/reel-02.jpg",
+    duration: "",
+    badge: "",
     badgeColor: "bg-red-500 text-white",
+    instagramUrl: "https://www.instagram.com/reel/DUumivLk-1J/?igsh=ODhlejExc2gzNXpx",
   },
   {
     id: "3",
-    title: "The Sisters",
-    genre: "Horror · Mystery",
-    releaseLabel: "Apr 2026",
-    poster: "/movie_posters/sisters_poster.webp",
-    duration: "2m 20s",
+    title: "Prakruti Mishra",
+    genre: "",
+    releaseLabel: "",
+    poster: "/reel_thumbnails/reel-03.jpg",
+    duration: "",
+    instagramUrl: "https://www.instagram.com/reel/DU0-XCkgc-U/?igsh=Z3k3YnJhM3BwYnhp",
   },
 ];
 
-function TrailerCard({ trailer, onClick }: { trailer: Trailer; onClick: () => void }) {
+function ReelCard({ reel }: { reel: Reel }) {
+  const handleClick = () => {
+    window.open(reel.instagramUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className="group relative flex-shrink-0 w-36 sm:w-44 rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 focus:outline-none"
-      aria-label={`Play ${trailer.title} trailer`}
+      aria-label={`Watch ${reel.title} reel on Instagram`}
     >
       {/* Poster */}
       <div className="relative aspect-[2/3] bg-[hsl(181_100%_9%/0.08)]">
         <img
-          src={trailer.poster}
-          alt={trailer.title}
+          src={reel.poster}
+          alt={reel.title}
           className="w-full h-full object-cover object-top"
           onError={(e) => {
-            // Fallback gradient if poster missing
             (e.target as HTMLImageElement).style.display = "none";
           }}
         />
@@ -76,107 +80,59 @@ function TrailerCard({ trailer, onClick }: { trailer: Trailer; onClick: () => vo
           </div>
         </div>
 
+        {/* Instagram icon */}
+        <div className="absolute top-2.5 right-2.5 opacity-70 group-hover:opacity-100 transition-opacity">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+        </div>
+
         {/* Badge */}
-        {trailer.badge && (
-          <div className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${trailer.badgeColor}`}>
-            {trailer.badge}
+        {reel.badge && (
+          <div className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${reel.badgeColor}`}>
+            {reel.badge}
           </div>
         )}
 
         {/* Duration */}
         <div className="absolute bottom-11 right-2.5 px-1.5 py-0.5 rounded bg-black/50 text-white text-[10px] font-bold backdrop-blur-sm">
-          {trailer.duration}
+          {reel.duration}
         </div>
 
         {/* Info at bottom */}
         <div className="absolute bottom-0 left-0 right-0 px-2.5 pb-2.5 pt-6">
-          <p className="text-white font-black text-xs leading-tight truncate">{trailer.title}</p>
-          <p className="text-white/60 text-[10px] font-medium mt-0.5">{trailer.releaseLabel}</p>
+          <p className="text-white font-black text-xs leading-tight truncate">{reel.title}</p>
+          <p className="text-white/60 text-[10px] font-medium mt-0.5">{reel.releaseLabel}</p>
         </div>
       </div>
     </button>
   );
 }
 
-export default function TrailerDrops() {
-  const [activeTrailer, setActiveTrailer] = useState<Trailer | null>(null);
-
+export default function Spotlight() {
   return (
-    <>
-      <section className="mt-10 mb-2">
-        {/* Section header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <h2 className="text-lg sm:text-xl font-black text-[hsl(181_100%_9%)] tracking-tight uppercase">
-                Trailer Drops
-              </h2>
-            </div>
-          </div>
-          <a
-            href="#"
-            className="text-xs font-bold text-[hsl(181_100%_9%/0.45)] hover:text-[hsl(181_100%_9%)] transition-colors flex items-center gap-1"
-          >
-            All trailers
-            <span className="material-symbols-outlined text-sm">chevron_right</span>
-          </a>
-        </div>
-
-        {/* Horizontal scroll row */}
-        <div
-          className="flex gap-3 overflow-x-auto pb-3"
-          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
-        >
-          {trailers.map((trailer) => (
-            <TrailerCard
-              key={trailer.id}
-              trailer={trailer}
-              onClick={() => setActiveTrailer(trailer)}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Lightbox / video modal */}
-      {activeTrailer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
-          onClick={() => setActiveTrailer(null)}
-        >
-          <div
-            className="relative w-full max-w-2xl bg-black rounded-2xl overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close */}
-            <button
-              onClick={() => setActiveTrailer(null)}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
-              aria-label="Close"
-            >
-              <span className="material-symbols-outlined text-lg">close</span>
-            </button>
-
-            {/* Video placeholder — replace src with actual embed */}
-            <div className="aspect-video bg-[hsl(181_100%_6%)] flex flex-col items-center justify-center gap-3">
-              <span className="material-symbols-outlined text-6xl text-white/20">movie</span>
-              <p className="text-white/50 text-sm font-bold">{activeTrailer.title} — Trailer</p>
-              <p className="text-white/30 text-xs">Embed your YouTube/video player here</p>
-            </div>
-
-            {/* Info bar */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[hsl(181_100%_6%)]">
-              <div>
-                <p className="text-white font-black text-sm">{activeTrailer.title}</p>
-                <p className="text-white/50 text-xs">{activeTrailer.genre} · {activeTrailer.releaseLabel}</p>
-              </div>
-              <button className="px-4 py-2 bg-teal-400 text-[hsl(181_100%_6%)] rounded-lg font-black text-xs hover:bg-teal-300 transition-colors">
-                Book Now
-              </button>
-            </div>
+    <section className="mt-10 mb-2">
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <h2 className="text-lg sm:text-xl font-black text-[hsl(181_100%_9%)] tracking-tight uppercase">
+              Spotlight
+            </h2>
           </div>
         </div>
-      )}
-    </>
+      </div>
+
+      {/* Horizontal scroll row */}
+      <div
+        className="flex gap-3 overflow-x-auto pb-3"
+        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+      >
+        {reels.map((reel) => (
+          <ReelCard key={reel.id} reel={reel} />
+        ))}
+      </div>
+    </section>
   );
 }

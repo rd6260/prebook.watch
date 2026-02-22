@@ -2,20 +2,18 @@
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
 import TrailerDrops from "@/components/TrailerDrops";
+import PremiereList from "@/components/PremiereList";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CityPickerModal from "@/components/CitySelectionComponent";
-import CinemaList from "@/components/CinemaList";
-import { cities } from "./select-cinema/page";
 
 export default function Home() {
   const router = useRouter();
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [preferredCity, setPreferredCity] = useState<string | null>(null);
-  const cinemaListRef = useRef<HTMLDivElement>(null);
+  const premiereRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("preferredCity");
@@ -29,7 +27,18 @@ export default function Home() {
     return () => window.removeEventListener("cityChanged", handleChange);
   }, []);
 
-  // Desktop Book Now → go to /select-cinema (or open city picker if no city saved)
+  // After city is chosen (modal closes), scroll premiere list into view on mobile
+  const handleCityPickerClose = () => {
+    setCityPickerOpen(false);
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setTimeout(() => {
+        premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  };
+
+  // Desktop Book Now → navigate to /select-cinema
   const handleBookNow = () => {
     const stored = localStorage.getItem("preferredCity");
     if (stored) {
@@ -39,14 +48,21 @@ export default function Home() {
     }
   };
 
-  // Mobile Book Now → smooth scroll to CinemaList centered in viewport
-  const handleScrollToCinemaList = () => {
-    cinemaListRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Mobile "Book Now" in Hero:
+  // If city exists → scroll to premiere list
+  // If no city → open city picker first (scroll happens after close)
+  const handleScrollToPremieres = () => {
+    const stored = localStorage.getItem("preferredCity");
+    if (stored) {
+      premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      setCityPickerOpen(true);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background-light text-text-main font-display">
-      <CityPickerModal isOpen={cityPickerOpen} onClose={() => setCityPickerOpen(false)} />
+      <CityPickerModal isOpen={cityPickerOpen} onClose={handleCityPickerClose} />
       <Navbar />
 
       {/* Welcome announcement bar */}
@@ -65,21 +81,31 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Hero
           onBookNow={handleBookNow}
-          onScrollToCinemaList={handleScrollToCinemaList}
+          onScrollToCinemaList={handleScrollToPremieres}
         />
 
-        {/* Ref wrapper so scroll-into-view lands on the list */}
-        <div ref={cinemaListRef}>
-          <CinemaList
-            cinemas={preferredCity ? (cities[preferredCity] ?? []) : []}
-            cityName={preferredCity ?? ""}
-          />
+        {/* Premiere list — mobile only (desktop goes to /select-cinema) */}
+        <div ref={premiereRef} className="md:hidden">
+          {preferredCity ? (
+            <PremiereList
+              cityName={preferredCity}
+              onBook={(premiere) => {
+                // TODO: wire to booking flow
+                console.log("Booking", premiere);
+              }}
+            />
+          ) : null}
         </div>
 
         <TrailerDrops />
+        <div className="mb-30"/>
+        {/* 
         <Newsletter />
+        */}
       </main>
+        {/* 
       <Footer />
+        */}
     </div>
   );
 }

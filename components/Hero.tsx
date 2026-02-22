@@ -9,15 +9,12 @@ interface HeroProps {
 
 export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
   const [muted, setMuted] = useState(true);
-  const mobileIframeRef = useRef<HTMLIFrameElement>(null);
-  const desktopIframeRef = useRef<HTMLIFrameElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleMute = () => {
-    const cmd = muted
-      ? '{"event":"command","func":"unMute","args":""}'
-      : '{"event":"command","func":"mute","args":""}';
-    mobileIframeRef.current?.contentWindow?.postMessage(cmd, "*");
-    desktopIframeRef.current?.contentWindow?.postMessage(cmd, "*");
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+    }
     setMuted((prev) => !prev);
   };
 
@@ -26,51 +23,40 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
       e.preventDefault();
       onBookNow();
     }
-    // else falls through to the href="/select-city" anchor default
   };
+
+  const VideoBackground = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
+    <video
+      ref={videoRef}
+      className={className}
+      style={style}
+      src="/videos/teaser.mp4"
+      autoPlay
+      muted
+      loop
+      playsInline
+    />
+  );
 
   return (
     <section className="relative w-full mb-12">
 
       {/* ─────────────────────────────────────────────
           MOBILE LAYOUT  (< md)
-          3:4 portrait card — video fills full height,
-          title + genres + description + CTA overlaid at bottom (centered).
       ───────────────────────────────────────────── */}
       <div className="md:hidden text-white">
-
-        {/* 3:4 Card — large corner radius */}
         <div
           className="relative overflow-hidden shadow-2xl shadow-black/60"
           style={{ aspectRatio: "3/4", borderRadius: "32px" }}
         >
           {/* Full-fill video */}
           <div className="absolute inset-0 w-full h-full bg-black">
-            <iframe
-              ref={mobileIframeRef}
-              className="absolute pointer-events-none"
-              src="https://www.youtube.com/embed/dVZC20xQmvU?autoplay=1&mute=1&loop=1&controls=0&playlist=dVZC20xQmvU&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
-              title="Bindusagar Teaser"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "177.78%",
-                height: "100%",
-              }}
+            <VideoBackground
+              className="absolute pointer-events-none w-full h-full object-cover"
             />
           </div>
 
-          {/* "Releasing Today" badge — top right */}
-          {/* 
-          <div className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur-sm border border-white/20 text-white text-[10px] font-semibold tracking-widest px-2.5 py-1 rounded-full">
-            Releasing Today
-          </div>
-          */}
-
-          {/* Mute button — bottom right, tiny */}
+          {/* Mute button */}
           <button
             onClick={toggleMute}
             className="absolute bottom-3 right-3 z-20 flex items-center justify-center w-6 h-6 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white active:scale-90 transition-all"
@@ -98,7 +84,6 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
               When a young woman's quest to discover her roots intersects with a grieving father's
               journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
             </p>
-            {/* Mobile: scroll down to CinemaList */}
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onScrollToCinemaList?.(); }}
@@ -114,45 +99,21 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
 
       {/* ─────────────────────────────────────────────
           DESKTOP LAYOUT  (>= md)
-          Cinematic full-bleed video, content bottom-left
       ───────────────────────────────────────────── */}
       <div
         className="hidden md:block relative rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/60"
         style={{ minHeight: "520px" }}
       >
         {/* Full-bleed video */}
-        <div className="absolute inset-0 w-full h-full">
-          <iframe
-            ref={desktopIframeRef}
-            className="pointer-events-none"
-            src="https://www.youtube.com/embed/dVZC20xQmvU?autoplay=1&mute=1&loop=1&controls=0&playlist=dVZC20xQmvU&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
-            title="Bindusagar Teaser"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        </div>
+        <VideoBackground
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        />
 
         {/* Gradients */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
-        {/* "Releasing Today" badge top-right */}
-
-        {/* 
-        <div className="absolute top-5 right-5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold tracking-widest px-3 py-1.5 rounded-full z-10">
-          Releasing Today
-        </div>
-        */}
-
-        {/* Mute button bottom-right */}
+        {/* Mute button */}
         <button
           onClick={toggleMute}
           className="absolute bottom-5 right-5 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 text-white hover:bg-black/80 active:scale-90 transition-all"
@@ -195,7 +156,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
           </p>
 
-          {/* CTA — uses onBookNow on desktop to redirect to /select-cinema with stored city */}
+          {/* CTA */}
           <a
             href="/select-city"
             onClick={handleBookNow}
