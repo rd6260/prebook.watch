@@ -82,7 +82,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
               </span>
             </div>
             */}
-           {/*
+            {/*
             <p className="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-4">
               When a young woman's quest to discover her roots intersects with a grieving father's
               journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
@@ -169,7 +169,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
           {/* CTA */}
           <a
             href="/select-city"
-            onClick={handleBookNow}
+            onClick={(e) => { e.preventDefault(); onScrollToCinemaList?.(); }}
             className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold hover:bg-slate-100 transition-all shadow-xl shadow-black/40 text-sm w-fit"
           >
             <span className="material-symbols-outlined text-base">confirmation_number</span>

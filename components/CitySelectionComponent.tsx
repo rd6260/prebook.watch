@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 
 const cities = [
   { name: "Bhubaneswar", icon: "temple_hindu" },
-  { name: "Mumbai",       icon: "apartment" },
-  { name: "Bengaluru",    icon: "developer_board" },
-  { name: "Hyderabad",    icon: "fort" },
-  { name: "Pune",         icon: "school" },
-  { name: "Gurgaon",      icon: "corporate_fare" },
-  { name: "Surat",        icon: "diamond" },
-  { name: "Goa",          icon: "beach_access" },
-  { name: "Cuttack",      icon: "castle" },
-  { name: "Sambalpur",    icon: "water" },
+  // { name: "Mumbai",       icon: "apartment" },
+  // { name: "Bengaluru",    icon: "developer_board" },
+  // { name: "Hyderabad",    icon: "fort" },
+  // { name: "Pune",         icon: "school" },
+  // { name: "Gurgaon",      icon: "corporate_fare" },
+  // { name: "Surat",        icon: "diamond" },
+  // { name: "Goa",          icon: "beach_access" },
+  // { name: "Cuttack",      icon: "castle" },
+  // { name: "Sambalpur",    icon: "water" },
 ];
 
 interface CityPickerModalProps {
@@ -183,10 +183,17 @@ export default function CityPickerModal({ isOpen, onClose }: CityPickerModalProp
 
         {/* Footer hint */}
         <div className="px-5 sm:px-6 py-3 border-t border-[hsl(181_54%_37%/0.1)] shrink-0">
+          <p className="text-xs text-center font-medium">
+            More cities coming soon
+          </p>
+        </div>
+        {/*
+        <div className="px-5 sm:px-6 py-3 border-t border-[hsl(181_54%_37%/0.1)] shrink-0">
           <p className="text-[10px] text-center text-[hsl(181_100%_9%/0.3)] font-medium">
             Tap a city to see available cinemas near you
           </p>
         </div>
+        */}
       </div>
     </div>
   );

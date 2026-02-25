@@ -32,8 +32,8 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
   const isIndustry = premiere.type === "Industry";
 
   return (
-    <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden">
-      <div className="px-5 pt-4 pb-5">
+    <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden flex flex-col">
+      <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
 
         {/* Header row: label pill + type indicator */}
         <div className="flex items-center justify-between mb-4">
@@ -45,7 +45,7 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
 
         {/* Title */}
         <h3 className="font-black text-[hsl(181_100%_9%)] text-lg leading-tight mb-0.5">
-          Bindusagar
+          Bindusagar — {isIndustry ? "Industry" : "Public"} Premiere
         </h3>
         <p className="text-sm font-semibold text-[hsl(181_100%_9%/0.5)] mb-4">
           {cityName}
@@ -67,14 +67,14 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         </div>
 
         {/* Availability */}
-        <p className="text-xs text-[hsl(181_100%_9%/0.45)] mb-5 leading-relaxed">
+        <p className="text-xs text-[hsl(181_100%_9%/0.45)] leading-relaxed flex-1">
           Limited tickets available · first come first serve
         </p>
 
-        {/* Book Now */}
+        {/* Book Now — pushed to bottom */}
         <button
           onClick={onBook}
-          className="w-full py-3 rounded-xl font-bold text-sm bg-[hsl(181_100%_9%)] text-white hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
+          className="mt-5 w-full py-3 rounded-xl font-bold text-sm bg-[hsl(181_100%_9%)] text-white hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
         >
           <span className="material-symbols-outlined text-base">confirmation_number</span>
           Book Now
@@ -91,10 +91,10 @@ interface PremiereListProps {
 
 export default function PremiereList({ cityName, onBook }: PremiereListProps) {
   return (
-    <div className="mt-5">
+    <div className="mt-5 w-full max-w-7xl mx-auto sm:px-2">
 
       {/* Section heading */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)]">
             Screenings in
@@ -105,8 +105,8 @@ export default function PremiereList({ cityName, onBook }: PremiereListProps) {
         </div>
       </div>
 
-      {/* Cards */}
-      <div className="space-y-3">
+      {/* Cards — stacked on mobile, side-by-side on sm+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {PREMIERES.map((p) => (
           <PremiereCard
             key={p.type}
