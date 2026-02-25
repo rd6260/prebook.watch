@@ -75,7 +75,6 @@ export default function Home() {
       <CityPickerModal
         isOpen={cityPickerOpen}
         onClose={handleCityPickerClose}
-        onCity={handleCitySelected}
       />
       <Navbar />
 
