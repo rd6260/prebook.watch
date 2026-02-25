@@ -66,7 +66,7 @@ export default function CityPickerModal({ isOpen, onClose }: CityPickerModalProp
     setTimeout(() => {
       onClose();
       if (!isMobile) {
-        router.push(`/select-cinema?city=${encodeURIComponent(name)}`);
+        // router.push(`/select-cinema?city=${encodeURIComponent(name)}`);
       }
     }, 220);
   };
