@@ -19,9 +19,10 @@ const cities = [
 interface CityPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCity: () => void;
 }
 
-export default function CityPickerModal({ isOpen, onClose }: CityPickerModalProps) {
+export default function CityPickerModal({ isOpen, onClose, onCity }: CityPickerModalProps) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -65,6 +66,7 @@ export default function CityPickerModal({ isOpen, onClose }: CityPickerModalProp
     const isMobile = window.innerWidth < 768;
     setTimeout(() => {
       onClose();
+      // onCity();
       if (!isMobile) {
         // router.push(`/select-cinema?city=${encodeURIComponent(name)}`);
       }

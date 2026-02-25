@@ -14,6 +14,7 @@ export default function Home() {
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [preferredCity, setPreferredCity] = useState<string | null>(null);
   const premiereRef = useRef<HTMLDivElement>(null);
+  const justSelectedCity = useRef(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("preferredCity");
@@ -27,15 +28,24 @@ export default function Home() {
     return () => window.removeEventListener("cityChanged", handleChange);
   }, []);
 
-  // After city is chosen (modal closes), scroll premiere list into view on mobile
+  // Scroll to premiere list whenever preferredCity updates AND it was triggered by city picker
+  useEffect(() => {
+    if (preferredCity && justSelectedCity.current) {
+      justSelectedCity.current = false;
+      setTimeout(() => {
+        premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+    }
+  }, [preferredCity]);
+
+  // Called by CityPickerModal's onCity prop — marks that scroll should happen
+  const handleCitySelected = () => {
+    justSelectedCity.current = true;
+  };
+
+  // Just closes the modal — scroll is handled by the useEffect above
   const handleCityPickerClose = () => {
     setCityPickerOpen(false);
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) {
-      setTimeout(() => {
-        premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100);
-    }
   };
 
   // Desktop Book Now → navigate to /select-cinema
@@ -50,11 +60,11 @@ export default function Home() {
 
   // Mobile "Book Now" in Hero:
   // If city exists → scroll to premiere list
-  // If no city → open city picker first (scroll happens after close)
+  // If no city → open city picker first (scroll happens after selection)
   const handleScrollToPremieres = () => {
     const stored = localStorage.getItem("preferredCity");
     if (stored) {
-      premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     } else {
       setCityPickerOpen(true);
     }
@@ -62,7 +72,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background-light text-text-main font-display">
-      <CityPickerModal isOpen={cityPickerOpen} onClose={handleCityPickerClose} />
+      <CityPickerModal
+        isOpen={cityPickerOpen}
+        onClose={handleCityPickerClose}
+        onCity={handleCitySelected}
+      />
       <Navbar />
 
       {/* Welcome announcement bar */}
@@ -84,13 +98,12 @@ export default function Home() {
           onScrollToCinemaList={handleScrollToPremieres}
         />
 
-        {/* Premiere list — mobile only (desktop goes to /select-cinema) */}
-        <div ref={premiereRef} className="">
+        {/* Premiere list */}
+        <div ref={premiereRef}>
           {preferredCity ? (
             <PremiereList
               cityName={preferredCity}
               onBook={(premiere) => {
-                // TODO: wire to booking flow
                 console.log("Booking", premiere);
               }}
             />
@@ -99,14 +112,8 @@ export default function Home() {
 
         <Spotlight />
         <CastList />
-        <div className="mb-30"/>
-        {/* 
-        <Newsletter />
-        */}
+        <div className="mb-30" />
       </main>
-        {/* 
-      <Footer />
-        */}
     </div>
   );
 }
