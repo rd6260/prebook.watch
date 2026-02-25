@@ -42,7 +42,7 @@ const cast: CastMember[] = [
     id: "6",
     name: "Pranab Prasanna Rath",
     role: "",
-    picture: "/cast/pranab-prasanna-rath.jpg",
+    picture: "/cast_and_crew/pranab-prasanna-rath.png",
   },
   {
     id: "7",
