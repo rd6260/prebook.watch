@@ -2,12 +2,12 @@
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Footer from "@/components/Footer";
-import TrailerDrops from "@/components/TrailerDrops";
+import Spotlight from "@/components/Spotlight";
 import PremiereList from "@/components/PremiereList";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import CityPickerModal from "@/components/CitySelectionComponent";
+import CastList from "@/components/CastList";
 
 export default function Home() {
   const router = useRouter();
@@ -85,7 +85,7 @@ export default function Home() {
         />
 
         {/* Premiere list — mobile only (desktop goes to /select-cinema) */}
-        <div ref={premiereRef} className="md:hidden">
+        <div ref={premiereRef} className="">
           {preferredCity ? (
             <PremiereList
               cityName={preferredCity}
@@ -97,7 +97,8 @@ export default function Home() {
           ) : null}
         </div>
 
-        <TrailerDrops />
+        <Spotlight />
+        <CastList />
         <div className="mb-30"/>
         {/* 
         <Newsletter />

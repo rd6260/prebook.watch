@@ -69,9 +69,10 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
 
           {/* Bottom overlay */}
           <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 pt-24 bg-gradient-to-t from-black via-black/70 to-transparent flex flex-col items-center text-center">
-            <h2 className="text-3xl font-black tracking-tight leading-none mb-2 drop-shadow-lg">
-              Bindusagar
+            <h2 className="text-3xl font-black mb-8 tracking-tight leading-none mb-2 drop-shadow-lg">
+              BINDUSAGAR
             </h2>
+            {/*
             <div className="flex flex-wrap justify-center gap-2 mb-2.5">
               <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
                 Drama
@@ -80,10 +81,13 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
                 Family
               </span>
             </div>
+            */}
+           {/*
             <p className="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-4">
               When a young woman's quest to discover her roots intersects with a grieving father's
               journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
             </p>
+            */}
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onScrollToCinemaList?.(); }}
@@ -130,6 +134,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
           style={{ minHeight: "520px" }}
         >
           {/* IMDb + year */}
+          {/* 
           <div className="flex items-center gap-3 mb-4">
             <span className="px-2 py-1 rounded bg-yellow-500 text-black font-bold text-[10px] tracking-widest">IMDb</span>
             <span className="flex items-center gap-1 text-sm font-medium">
@@ -138,23 +143,28 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             </span>
             <span className="text-xs text-slate-400 border border-slate-600 px-2 py-0.5 rounded-full">2025</span>
           </div>
+          */}
 
           {/* Title */}
-          <h2 className="text-6xl xl:text-7xl font-black tracking-tight leading-none mb-4 drop-shadow-2xl">
-            Bindusagar
+          <h2 className="text-6xl mb-12 xl:text-7xl font-black tracking-tight leading-none mb-4 drop-shadow-2xl">
+            BINDUSAGAR
           </h2>
 
           {/* Genre pills */}
+          {/*
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Spiritual Drama</span>
             <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Family</span>
           </div>
+          */}
 
           {/* Description */}
+          {/*
           <p className="text-sm text-slate-300 leading-relaxed mb-7 max-w-sm font-light">
             When a young woman's quest to discover her roots intersects with a grieving father's
             journey to faith, they find redemption and purpose in the ancient city of Bhubaneswar, India.
           </p>
+          */}
 
           {/* CTA */}
           <a
