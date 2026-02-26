@@ -79,8 +79,8 @@ function InputField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all ${error
-            ? "border-red-300 focus:border-red-400"
-            : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
+          ? "border-red-300 focus:border-red-400"
+          : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
           }`}
       />
       {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
@@ -306,7 +306,7 @@ export default function BookingPage() {
     email: "",
     ticket_count: 1,
   });
-  const [errors, setErrors] = useState<Partial<BookingForm>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof BookingForm, string>>>({});
   const [step, setStep] = useState<BookingStep>("form");
   const [bookingId, setBookingId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
@@ -333,8 +333,9 @@ export default function BookingPage() {
     else if (!/^[6-9]\d{9}$/.test(form.phone.trim())) e.phone = "Enter a valid 10-digit mobile number";
     if (!form.email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email address";
-    if (form.ticket_count < 1 || form.ticket_count > MAX_TICKETS)
+    if (form.ticket_count < 1 || form.ticket_count > MAX_TICKETS) {
       e.ticket_count = `Between 1 and ${MAX_TICKETS} tickets`;
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   }
