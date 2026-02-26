@@ -102,9 +102,6 @@ export default function Home() {
           {preferredCity ? (
             <PremiereList
               cityName={preferredCity}
-              onBook={(premiere) => {
-                console.log("Booking", premiere);
-              }}
             />
           ) : null}
         </div>
