@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -294,7 +294,7 @@ function SuccessScreen({ ticketType }: { ticketType: string }) {
 }
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
-export default function BookingPage() {
+function BookingPageInner() {
   const searchParams = useSearchParams();
   const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry";
 
@@ -538,5 +538,13 @@ export default function BookingPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[hsl(181_5%_97%)]" />}>
+      <BookingPageInner />
+    </Suspense>
   );
 }
