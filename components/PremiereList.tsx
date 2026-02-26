@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 type Premiere = {
   type: "Industry" | "Public";
   label: string;
@@ -86,10 +88,15 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
 
 interface PremiereListProps {
   cityName: string;
-  onBook?: (premiere: Premiere) => void;
 }
 
-export default function PremiereList({ cityName, onBook }: PremiereListProps) {
+export default function PremiereList({ cityName }: PremiereListProps) {
+  const router = useRouter();
+
+  function handleBook(premiere: Premiere) {
+    router.push(`/book?type=${encodeURIComponent(premiere.type)}`);
+  }
+
   return (
     <div className="mt-5 w-full max-w-7xl mx-auto sm:px-2">
 
@@ -112,7 +119,7 @@ export default function PremiereList({ cityName, onBook }: PremiereListProps) {
             key={p.type}
             premiere={p}
             cityName={cityName}
-            onBook={() => onBook?.(p)}
+            onBook={() => handleBook(p)}
           />
         ))}
       </div>
