@@ -34,9 +34,10 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 w-full border-b border-[hsl(181_54%_37%/0.15)] bg-[hsl(180_88%_90%/0.85)] backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo & Search */}
             {/* */}
             <div className="flex items-center gap-8 flex-1">
+
+            {/*
               <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
                 <button
                   onClick={() => setCityPickerOpen(true)}
@@ -49,6 +50,7 @@ export default function Navbar() {
                   <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
                 </button>
               </div>
+            */}
               {/* 
 
               <div className="hidden md:flex flex-1 max-w-md">
@@ -69,14 +71,16 @@ export default function Navbar() {
             {/* Nav & Actions */}
             <div className="flex ml-6 items-center gap-6">
               {/* Desktop: centered absolutely */}
-              <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
+              <div className="md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
                 <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
               </div>
 
               {/* Mobile: stays in flow as before */}
+              {/*
               <div className="flex md:hidden items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6 ml-2">
                 <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
               </div>
+              */}
             </div>
             {/*
             <div className="flex ml-6 items-center gap-6">

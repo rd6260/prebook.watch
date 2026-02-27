@@ -71,7 +71,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             </h2>
             <div className="flex flex-wrap justify-center gap-2 mb-2.5">
               <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
-                Welcome to Bindusagar Public Premier
+                Be the First to Watch
               </span>
             </div>
             {/*
@@ -86,7 +86,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
               className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold text-sm hover:bg-slate-100 transition-all shadow-lg shadow-black/30"
             >
               <span className="material-symbols-outlined text-base">confirmation_number</span>
-              Be the first one to watch. Book Now!
+              Book Now!
             </a>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
 
           {/* Genre pills */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Welcome to Bindusagar Public Premier</span>
+            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Be the First to Watch</span>
           </div>
 
           {/* Description */}
@@ -168,7 +168,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold hover:bg-slate-100 transition-all shadow-xl shadow-black/40 text-sm w-fit"
           >
             <span className="material-symbols-outlined text-base">confirmation_number</span>
-            Be the first one to watch. Book Now!
+            Book Now!
           </a>
         </div>
       </div>
