@@ -35,6 +35,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo & Search */}
+            {/* */}
             <div className="flex items-center gap-8 flex-1">
               <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
                 <button
@@ -48,6 +49,8 @@ export default function Navbar() {
                   <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
                 </button>
               </div>
+              {/* 
+
               <div className="hidden md:flex flex-1 max-w-md">
                 <div className="relative w-full">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -60,22 +63,29 @@ export default function Navbar() {
                   />
                 </div>
               </div>
+              */}
             </div>
 
             {/* Nav & Actions */}
             <div className="flex ml-6 items-center gap-6">
-              <nav className="hidden lg:flex items-center gap-8">
-                {["Movies", "Cinemas", "Offers"].map((item) => (
-                  <a
-                    key={item}
-                    href="#"
-                    className="text-sm font-semibold hover:text-[hsl(181_100%_9%)] text-[hsl(181_100%_9%/0.7)] transition-colors"
-                  >
-                    {item}
-                  </a>
-                ))}
-              </nav>
+              {/* 
+
+                <nav className="hidden lg:flex items-center gap-8">
+                  {["Movies", "Cinemas", "Offers"].map((item) => (
+                    <a
+                      key={item}
+                      href="#"
+                      className="text-sm font-semibold hover:text-[hsl(181_100%_9%)] text-[hsl(181_100%_9%/0.7)] transition-colors"
+                    >
+                      {item}
+                    </a>
+                  ))}
+                </nav>
+                */}
               <div className="flex items-center gap-3 border-l border-[hsl(181_54%_37%/0.15)] pl-6 ml-2">
+                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
+                {/* 
+
                 <div className="h-10 w-10 rounded-full bg-[hsl(181_100%_9%)] flex items-center justify-center text-white cursor-pointer overflow-hidden ring-2 ring-[hsl(181_100%_9%/0.2)]">
                   <img
                     src="https://api.dicebear.com/7.x/avataaars/svg?seed=aperson"
@@ -83,6 +93,7 @@ export default function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 </div>
+                */}
               </div>
             </div>
           </div>

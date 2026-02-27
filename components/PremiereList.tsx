@@ -70,7 +70,7 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
 
         {/* Availability */}
         <p className="text-xs text-[hsl(181_100%_9%/0.45)] leading-relaxed flex-1">
-          Limited tickets available · first come first serve
+          Free Seating · Seats Will Be Allotted Prior to the Event
         </p>
 
         {/* Book Now — pushed to bottom */}
