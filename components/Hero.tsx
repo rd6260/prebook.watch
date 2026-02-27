@@ -66,19 +66,14 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
 
           {/* Bottom overlay */}
           <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 pt-24 bg-gradient-to-t from-black via-black/70 to-transparent flex flex-col items-center text-center">
-            <h2 className="text-3xl font-black mb-8 tracking-tight leading-none mb-2 drop-shadow-lg">
+            <h2 className="text-3xl mb-4 font-black tracking-tight leading-none mb-2 drop-shadow-lg">
               BINDUSAGAR
             </h2>
-            {/*
             <div className="flex flex-wrap justify-center gap-2 mb-2.5">
               <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
-                Drama
-              </span>
-              <span className="text-xs border border-white/40 text-white/90 px-3 py-0.5 rounded-full bg-white/10">
-                Family
+                Welcome to Bindusagar Public Premier
               </span>
             </div>
-            */}
             {/*
             <p className="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-4">
               When a young woman's quest to discover her roots intersects with a grieving father's
@@ -149,17 +144,14 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
           */}
 
           {/* Title */}
-          <h2 className="text-6xl mb-12 xl:text-7xl font-black tracking-tight leading-none mb-4 drop-shadow-2xl">
+          <h2 className="text-6xl mb-8 xl:text-7xl font-black tracking-tight leading-none mb-4 drop-shadow-2xl">
             BINDUSAGAR
           </h2>
 
           {/* Genre pills */}
-          {/*
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Spiritual Drama</span>
-            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Family</span>
+            <span className="text-xs border border-white/30 text-slate-200 px-3 py-1 rounded-full backdrop-blur-sm bg-white/10">Welcome to Bindusagar Public Premier</span>
           </div>
-          */}
 
           {/* Description */}
           {/*

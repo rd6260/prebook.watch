@@ -68,8 +68,18 @@ export default function Navbar() {
 
             {/* Nav & Actions */}
             <div className="flex ml-6 items-center gap-6">
-              {/* 
+              {/* Desktop: centered absolutely */}
+              <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
+                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
+              </div>
 
+              {/* Mobile: stays in flow as before */}
+              <div className="flex md:hidden items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6 ml-2">
+                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
+              </div>
+            </div>
+            {/*
+            <div className="flex ml-6 items-center gap-6">
                 <nav className="hidden lg:flex items-center gap-8">
                   {["Movies", "Cinemas", "Offers"].map((item) => (
                     <a
@@ -81,10 +91,8 @@ export default function Navbar() {
                     </a>
                   ))}
                 </nav>
-                */}
-              <div className="flex items-center gap-3 border-l border-[hsl(181_54%_37%/0.15)] pl-6 ml-2">
+              <div className="flex items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6 ml-2">
                 <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
-                {/* 
 
                 <div className="h-10 w-10 rounded-full bg-[hsl(181_100%_9%)] flex items-center justify-center text-white cursor-pointer overflow-hidden ring-2 ring-[hsl(181_100%_9%/0.2)]">
                   <img
@@ -93,9 +101,9 @@ export default function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                */}
               </div>
             </div>
+            */}
           </div>
         </div>
       </header>

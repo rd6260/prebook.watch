@@ -19,7 +19,7 @@ const PREMIERES: Premiere[] = [
   {
     type: "Public",
     label: "Public Premiere",
-    date: "April 9",
+    date: "Thursday, April 9",
     time: "7:00 pm onwards",
   },
 ];
@@ -49,9 +49,20 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         <h3 className="font-black text-[hsl(181_100%_9%)] text-lg leading-tight mb-0.5">
           Bindusagar — {isIndustry ? "Industry" : "Public"} Premiere
         </h3>
-        <p className="text-sm font-semibold text-[hsl(181_100%_9%/0.5)] mb-4">
+        <p className="text-sm font-semibold text-[hsl(181_100%_9%/0.5)] mb-1">
           {cityName}
         </p>
+
+        {/* Cast & crew note — only for Industry premiere */}
+        {isIndustry && (
+          <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] mb-4 flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-sm leading-none">groups</span>
+            Attended by the cast &amp; crew of the film
+          </p>
+        )}
+
+        {/* Spacer for Public card to align divider */}
+        {!isIndustry && <div className="mb-4" />}
 
         {/* Divider */}
         <div className="h-px bg-[hsl(181_100%_9%/0.07)] mb-4" />

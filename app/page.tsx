@@ -33,7 +33,7 @@ export default function Home() {
     if (preferredCity && justSelectedCity.current) {
       justSelectedCity.current = false;
       setTimeout(() => {
-        premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 150);
     }
   }, [preferredCity]);
@@ -79,6 +79,7 @@ export default function Home() {
       <Navbar />
 
       {/* Welcome announcement bar */}
+      {/* 
       <div className="w-full bg-[hsl(181_100%_6%)] border-b border-teal-900/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-center gap-2.5">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
@@ -90,6 +91,7 @@ export default function Home() {
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
         </div>
       </div>
+      */}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Hero
