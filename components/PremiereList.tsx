@@ -56,8 +56,8 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
         label: "Special Matinee Show",
         date: "Thursday, April 9",
         time: "3:00 pm onwards",
-        icon: "wb_sunny",
-        description: "Special Matinee Show",
+        icon: "",
+        description: "",
       },
     ],
   },
@@ -140,9 +140,11 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         </div>
 
         {/* Availability */}
+        {/*
         <p className="text-xs text-[hsl(181_100%_9%/0.45)] leading-relaxed flex-1">
           Free Seating · Seats Will Be Allotted Prior to the Event
         </p>
+        */}
 
         {/* Book Now */}
         <button
