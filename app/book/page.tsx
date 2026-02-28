@@ -328,11 +328,42 @@ function PaymentModal({
 
 // ─── Success Screen ──────────────────────────────────────────────────────────
 function SuccessScreen({ details }: { details: SuccessDetails }) {
-  const router = useRouter();
   const premiereDate = PREMIERE_DATES[details.ticketType] ?? "—";
   const paymentLabel = details.paymentDetails
     ? formatPaymentMethod(details.paymentDetails)
     : null;
+
+  function handleSavePDF() {
+    const styleId = "booking-print-style";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.innerHTML = `
+        @media print {
+          @page { margin: 12mm; size: A4 portrait; }
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
+          }
+          body * { visibility: hidden !important; }
+          #booking-confirmation, #booking-confirmation * { visibility: visible !important; }
+          #booking-confirmation {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+          }
+          #save-pdf-btn { display: none !important; }
+          #booking-venue-note { display: none !important; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    window.print();
+  }
 
   function Row({ icon, label, value }: { icon: string; label: string; value: string }) {
     return (
@@ -352,7 +383,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
 
   return (
     <div className="min-h-screen bg-[hsl(181_5%_97%)] flex flex-col items-center justify-start pt-10 pb-16 px-4">
-      <div className="w-full max-w-md">
+      <div id="booking-confirmation" className="w-full max-w-md">
         {/* Icon + heading */}
         <div className="text-center mb-7">
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
@@ -409,13 +440,11 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
                 <span className="material-symbols-outlined text-sm">verified</span>
                 {paymentLabel ? paymentLabel.label : "Online"}
               </span>
-              {/* Sub-label: VPA for UPI, bank for netbanking, etc. */}
               {paymentLabel?.sub && (
                 <p className="text-[10px] text-[hsl(181_100%_9%/0.4)] font-medium mt-1">
                   {paymentLabel.sub}
                 </p>
               )}
-              {/* Payment ID */}
               {details.paymentId && (
                 <p className="text-[10px] text-[hsl(181_100%_9%/0.3)] font-medium mt-1 font-mono">
                   {details.paymentId}
@@ -426,19 +455,21 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
         </div>
 
         {/* Venue note */}
-        <div className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+        <div id="booking-venue-note" className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
           <span className="material-symbols-outlined text-amber-500 text-base flex-shrink-0 mt-0.5">info</span>
           <p className="text-xs text-amber-800 leading-relaxed">
             <span className="font-bold">Note:</span> Venue and seat allotment details will be sent to your registered mobile number two days before the premiere.
           </p>
         </div>
 
+        {/* Save as PDF button */}
         <button
-          onClick={() => router.push("/")}
+          id="save-pdf-btn"
+          onClick={handleSavePDF}
           className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
         >
-          <span className="material-symbols-outlined text-base">home</span>
-          Back to Home
+          <span className="material-symbols-outlined text-base">download</span>
+          Save as PDF
         </button>
       </div>
     </div>
@@ -523,13 +554,12 @@ function BookingPageInner() {
   }
 
   async function handlePaymentSuccess(paymentId: string) {
-    // Fetch actual payment method from Razorpay via our server route
     let paymentDetails: PaymentDetails | null = null;
     try {
       const res = await fetch(`/api/getPaymentDetails?payment_id=${paymentId}`);
       if (res.ok) paymentDetails = await res.json();
     } catch {
-      // Non-critical — success screen still shows without method details
+      // Non-critical
     }
 
     setSuccessDetails({
