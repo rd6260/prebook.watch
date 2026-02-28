@@ -6,6 +6,7 @@ import Spotlight from "@/components/Spotlight";
 import PremiereList from "@/components/PremiereList";
 import { useState, useEffect, useRef } from "react";
 import CastList from "@/components/CastList";
+import Footer from "@/components/Footer";
 
 const DEFAULT_CITY = "Bhubaneswar";
 
@@ -62,6 +63,7 @@ export default function Home() {
         <CastList />
         <div className="mb-30" />
       </main>
+      <Footer/>
     </div>
   );
 }

@@ -727,18 +727,56 @@ function BookingPageInner() {
       // Non-critical
     }
 
+    const bookedAt = new Date();
+    const totalAmount = pricePerTicket * form.ticket_count;
+
     setSuccessDetails({
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
       ticketType,
       ticketCount: form.ticket_count,
-      totalAmount: pricePerTicket * form.ticket_count,
-      bookedAt: new Date(),
+      totalAmount,
+      bookedAt,
       paymentId,
       paymentDetails,
     });
     setStep("success");
+
+    // Send confirmation email — fire and forget, don't block the success screen
+    fetch("/api/sendBookingEmail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        ticketType,
+        ticketCount: form.ticket_count,
+        totalAmount,
+        bookedAt: bookedAt.toLocaleString("en-IN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }),
+        paymentId,
+        paymentMethod: paymentDetails ? (() => {
+          const p = paymentDetails!;
+          switch (p.method) {
+            case "card":      return p.card_network ? `${p.card_network} Card` : "Card";
+            case "upi":       return p.vpa ? `UPI (${p.vpa})` : "UPI";
+            case "netbanking":return p.bank ? `Net Banking (${p.bank})` : "Net Banking";
+            case "wallet":    return p.wallet ? `${p.wallet} Wallet` : "Wallet";
+            default:          return p.method;
+          }
+        })() : null,
+      }),
+    }).catch((err) => console.error("Email send failed:", err));
   }
 
   if (city === null) return null;
