@@ -35,7 +35,7 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
         time: "7:30 pm onwards",
         icon: "groups",
         description:
-          "An exclusive first screening in the presence of the Cast, Crew, and esteemed members of the film fraternity.",
+          "Exclusive first screening with the cast, crew, and esteemed members of the film fraternity",
       },
       {
         type: "Public",
