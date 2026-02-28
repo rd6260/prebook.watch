@@ -65,7 +65,7 @@ export default function Navbar({ onCityClick }: NavbarProps) {
               <div className="flex md:absolute md:left-1/2 md:-translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
                 <div className="flex flex-col items-center">
                   <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
-                  <span className="text-[12px] font-medium tracking-wide text-[hsl(181_100%_9%/0.55)] -mt-0.5">BE THE FIRST TO WATCH</span>
+                  <span className="text-[9px] sm:text-[12px] font-medium tracking-wide text-[hsl(181_100%_9%/0.55)] -mt-0.5">BE THE FIRST TO WATCH</span>
                 </div>
               </div>
 
