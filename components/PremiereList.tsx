@@ -57,7 +57,7 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         {isIndustry && (
           <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] mb-4 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-sm leading-none">groups</span>
-            Attended by the cast &amp; crew of the film
+            To be attended by the cast &amp; crew
           </p>
         )}
 

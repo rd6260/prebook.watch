@@ -11,7 +11,7 @@ const supabase = createClient();
 
 export async function POST(req: NextRequest) {
   try {
-    const { amount, currency, booking_id, phone_no } = await req.json();
+    const { amount, currency, booking_id, phone_no, email } = await req.json();
 
     if (!amount || !currency || !booking_id) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       .insert({
         booking_id,
         phone_no: phone_no ?? null,
+        email: email ?? null,
         razorpay_order_id: order.id,
         amount: actualAmount.toString(),
         currency,

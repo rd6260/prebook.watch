@@ -12,6 +12,11 @@ const TICKET_PRICES: Record<string, number> = {
   Public: 350,
 };
 
+const PREMIERE_DATES: Record<string, string> = {
+  Industry: "Wednesday, April 8",
+  Public: "Thursday, April 9",
+};
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 type BookingForm = {
   name: string;
@@ -21,6 +26,26 @@ type BookingForm = {
 };
 
 type BookingStep = "form" | "payment" | "success";
+
+type PaymentDetails = {
+  method: string;
+  card_network: string | null;
+  bank: string | null;
+  wallet: string | null;
+  vpa: string | null;
+};
+
+type SuccessDetails = {
+  name: string;
+  email: string;
+  phone: string;
+  ticketType: string;
+  ticketCount: number;
+  totalAmount: number;
+  bookedAt: Date;
+  paymentId: string;
+  paymentDetails: PaymentDetails | null;
+};
 
 declare global {
   interface Window {
@@ -42,8 +67,54 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
+function formatDateTime(date: Date): string {
+  return date.toLocaleString("en-IN", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
 
+/** Turn Razorpay's raw payment data into a human-readable label + sub-label */
+function formatPaymentMethod(p: PaymentDetails): { label: string; sub: string | null } {
+  switch (p.method) {
+    case "card":
+      return {
+        label: p.card_network ? `${p.card_network} Card` : "Card",
+        sub: null,
+      };
+    case "upi":
+      return {
+        label: "UPI",
+        sub: p.vpa ?? null,
+      };
+    case "netbanking":
+      return {
+        label: "Net Banking",
+        sub: p.bank ?? null,
+      };
+    case "wallet":
+      return {
+        label: p.wallet
+          ? p.wallet.charAt(0).toUpperCase() + p.wallet.slice(1) + " Wallet"
+          : "Wallet",
+        sub: null,
+      };
+    case "emi":
+      return { label: "EMI", sub: p.card_network ?? null };
+    case "paylater":
+      return { label: "Pay Later", sub: null };
+    default:
+      return { label: p.method, sub: null };
+  }
+}
+
+// ─── Sub-components ─────────────────────────────────────────────────────────
 function InputField({
   label,
   id,
@@ -78,10 +149,11 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all ${error
-          ? "border-red-300 focus:border-red-400"
-          : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
-          }`}
+        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all ${
+          error
+            ? "border-red-300 focus:border-red-400"
+            : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
+        }`}
       />
       {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
     </div>
@@ -94,6 +166,7 @@ function PaymentModal({
   ticketCount,
   bookingId,
   phone,
+  email,
   onSuccess,
   onClose,
 }: {
@@ -101,7 +174,8 @@ function PaymentModal({
   ticketCount: number;
   bookingId: string;
   phone: string;
-  onSuccess: () => void;
+  email: string;
+  onSuccess: (paymentId: string) => void;
   onClose: () => void;
 }) {
   const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
@@ -129,6 +203,7 @@ function PaymentModal({
           currency: "INR",
           booking_id: bookingId,
           phone_no: phone,
+          email,
         }),
       });
 
@@ -160,16 +235,14 @@ function PaymentModal({
           });
           const verifyData = await verifyRes.json();
           if (verifyData.isOk) {
-            onSuccess();
+            onSuccess(response.razorpay_payment_id);
           } else {
             setError("Payment verification failed. Contact support.");
           }
         },
         prefill: { contact: phone },
         theme: { color: "#012d2f" },
-        modal: {
-          ondismiss: () => setLoading(false),
-        },
+        modal: { ondismiss: () => setLoading(false) },
       };
 
       const rzp = new window.Razorpay(options);
@@ -187,16 +260,11 @@ function PaymentModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
         <div className="bg-[hsl(181_100%_9%)] px-6 py-5">
-          <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">
-            Order Summary
-          </p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">Order Summary</p>
           <h2 className="text-white font-black text-xl">Complete Payment</h2>
         </div>
-
         <div className="px-6 py-5 flex flex-col gap-4">
-          {/* Breakdown */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between text-sm">
               <span className="text-[hsl(181_100%_9%/0.55)] font-medium">
@@ -214,25 +282,15 @@ function PaymentModal({
               </span>
             </div>
           </div>
-
-          {/* Note */}
           <div className="flex gap-2 bg-[hsl(181_100%_9%/0.04)] rounded-xl px-3 py-2.5">
-            <span className="material-symbols-outlined text-sm text-[hsl(181_100%_9%/0.4)] flex-shrink-0 mt-0.5">
-              info
-            </span>
+            <span className="material-symbols-outlined text-sm text-[hsl(181_100%_9%/0.4)] flex-shrink-0 mt-0.5">info</span>
             <p className="text-xs text-[hsl(181_100%_9%/0.55)] leading-relaxed">
-              Tickets will be allotted prior to the event. Details will be sent to your registered
-              email or phone number.
+              Tickets will be allotted prior to the event. Details will be sent to your registered email or phone number.
             </p>
           </div>
-
           {error && (
-            <p className="text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-3 py-2.5">
-              {error}
-            </p>
+            <p className="text-xs text-red-500 font-semibold bg-red-50 rounded-xl px-3 py-2.5">{error}</p>
           )}
-
-          {/* Buttons */}
           <div className="flex gap-3 mt-1">
             <button
               onClick={onClose}
@@ -269,23 +327,117 @@ function PaymentModal({
 }
 
 // ─── Success Screen ──────────────────────────────────────────────────────────
-function SuccessScreen({ ticketType }: { ticketType: string }) {
+function SuccessScreen({ details }: { details: SuccessDetails }) {
   const router = useRouter();
-  return (
-    <div className="min-h-screen bg-[hsl(181_5%_97%)] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm text-center">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
-          <span className="material-symbols-outlined text-3xl text-emerald-600">check_circle</span>
+  const premiereDate = PREMIERE_DATES[details.ticketType] ?? "—";
+  const paymentLabel = details.paymentDetails
+    ? formatPaymentMethod(details.paymentDetails)
+    : null;
+
+  function Row({ icon, label, value }: { icon: string; label: string; value: string }) {
+    return (
+      <div className="flex items-start gap-3 py-3 border-b border-[hsl(181_100%_9%/0.06)] last:border-0">
+        <span className="material-symbols-outlined text-[hsl(181_100%_9%/0.35)] text-base flex-shrink-0 mt-0.5">
+          {icon}
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.35)] mb-0.5">
+            {label}
+          </p>
+          <p className="text-sm font-bold text-[hsl(181_100%_9%)] break-words">{value}</p>
         </div>
-        <h1 className="font-black text-[hsl(181_100%_9%)] text-2xl mb-2">Booking Confirmed!</h1>
-        <p className="text-sm text-[hsl(181_100%_9%/0.55)] mb-6 leading-relaxed">
-          Your {ticketType} Premiere tickets have been booked. Ticket details will be sent to your
-          registered email or phone number prior to the event.
-        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[hsl(181_5%_97%)] flex flex-col items-center justify-start pt-10 pb-16 px-4">
+      <div className="w-full max-w-md">
+        {/* Icon + heading */}
+        <div className="text-center mb-7">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+            <span className="material-symbols-outlined text-3xl text-emerald-600">check_circle</span>
+          </div>
+          <h1 className="font-black text-[hsl(181_100%_9%)] text-2xl mb-1">Booking Confirmed!</h1>
+          <p className="text-sm text-[hsl(181_100%_9%/0.5)] leading-relaxed">
+            Your tickets have been booked successfully. A confirmation will be sent to your registered contact.
+          </p>
+        </div>
+
+        {/* Booking summary card */}
+        <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden mb-4">
+          {/* Card header */}
+          <div className="bg-[hsl(181_100%_9%)] px-5 py-4 flex items-center gap-3">
+            <span className="material-symbols-outlined text-white/70 text-lg">confirmation_number</span>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Booking Details</p>
+              <p className="text-white font-black text-base leading-tight">
+                Bindusagar — {details.ticketType} Premiere
+              </p>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <div className="px-5 pt-1 pb-2">
+            <Row icon="person"               label="Name"               value={details.name} />
+            <Row icon="mail"                 label="Email"              value={details.email} />
+            <Row icon="smartphone"           label="Mobile"             value={`+91 ${details.phone}`} />
+            <Row icon="event"                label="Premiere Date"      value={premiereDate} />
+            <Row icon="confirmation_number"  label="Number of Tickets"  value={`${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}`} />
+            <Row icon="movie"                label="Ticket Type"        value={`${details.ticketType} Premiere`} />
+            <Row icon="schedule"             label="Booked At"          value={formatDateTime(details.bookedAt)} />
+          </div>
+
+          {/* Amount + Payment mode footer */}
+          <div className="mx-4 mb-4 rounded-xl bg-[hsl(181_100%_9%/0.04)] border border-[hsl(181_100%_9%/0.08)] px-4 py-3.5 flex items-center justify-between gap-3">
+            {/* Amount */}
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)] mb-0.5">
+                Amount Paid
+              </p>
+              <p className="text-2xl font-black text-[hsl(181_100%_9%)]">
+                ₹{details.totalAmount.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+            {/* Payment mode */}
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)] mb-1">
+                Payment Mode
+              </p>
+              <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 text-xs font-black px-2.5 py-1 rounded-full">
+                <span className="material-symbols-outlined text-sm">verified</span>
+                {paymentLabel ? paymentLabel.label : "Online"}
+              </span>
+              {/* Sub-label: VPA for UPI, bank for netbanking, etc. */}
+              {paymentLabel?.sub && (
+                <p className="text-[10px] text-[hsl(181_100%_9%/0.4)] font-medium mt-1">
+                  {paymentLabel.sub}
+                </p>
+              )}
+              {/* Payment ID */}
+              {details.paymentId && (
+                <p className="text-[10px] text-[hsl(181_100%_9%/0.3)] font-medium mt-1 font-mono">
+                  {details.paymentId}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Venue note */}
+        <div className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+          <span className="material-symbols-outlined text-amber-500 text-base flex-shrink-0 mt-0.5">info</span>
+          <p className="text-xs text-amber-800 leading-relaxed">
+            <span className="font-bold">Note:</span> Venue and seat allotment details will be sent to your registered mobile number two days before the premiere.
+          </p>
+        </div>
+
         <button
           onClick={() => router.push("/")}
-          className="px-6 py-3 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] transition-all"
+          className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
         >
+          <span className="material-symbols-outlined text-base">home</span>
           Back to Home
         </button>
       </div>
@@ -309,12 +461,12 @@ function BookingPageInner() {
   const [errors, setErrors] = useState<Partial<Record<keyof BookingForm, string>>>({});
   const [step, setStep] = useState<BookingStep>("form");
   const [bookingId, setBookingId] = useState<string>("");
+  const [successDetails, setSuccessDetails] = useState<SuccessDetails | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
   const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
   const [city, setCity] = useState<string | null>(null);
-
   const router = useRouter();
 
   useEffect(() => {
@@ -353,7 +505,7 @@ function BookingPageInner() {
         email: form.email.trim(),
         ticket_count: form.ticket_count,
         ticket_type: ticketType,
-        city: city,
+        city,
         is_paid: false,
       })
       .select("id")
@@ -370,8 +522,32 @@ function BookingPageInner() {
     setStep("payment");
   }
 
-  if (city === null) return null; // waiting for redirect or city resolution
-  if (step === "success") return <SuccessScreen ticketType={ticketType} />;
+  async function handlePaymentSuccess(paymentId: string) {
+    // Fetch actual payment method from Razorpay via our server route
+    let paymentDetails: PaymentDetails | null = null;
+    try {
+      const res = await fetch(`/api/getPaymentDetails?payment_id=${paymentId}`);
+      if (res.ok) paymentDetails = await res.json();
+    } catch {
+      // Non-critical — success screen still shows without method details
+    }
+
+    setSuccessDetails({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      ticketType,
+      ticketCount: form.ticket_count,
+      totalAmount: pricePerTicket * form.ticket_count,
+      bookedAt: new Date(),
+      paymentId,
+      paymentDetails,
+    });
+    setStep("success");
+  }
+
+  if (city === null) return null;
+  if (step === "success" && successDetails) return <SuccessScreen details={successDetails} />;
 
   return (
     <div className="min-h-screen bg-[hsl(181_5%_97%)]">
@@ -382,9 +558,7 @@ function BookingPageInner() {
             onClick={() => window.history.back()}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[hsl(181_100%_9%/0.06)] transition-all"
           >
-            <span className="material-symbols-outlined text-lg text-[hsl(181_100%_9%)]">
-              arrow_back
-            </span>
+            <span className="material-symbols-outlined text-lg text-[hsl(181_100%_9%)]">arrow_back</span>
           </button>
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)]">
@@ -413,39 +587,17 @@ function BookingPageInner() {
         <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-1">
             <h2 className="font-black text-[hsl(181_100%_9%)] text-base mb-0.5">Your Details</h2>
-            <p className="text-xs text-[hsl(181_100%_9%/0.45)] mb-5">
-              Fill in your information to reserve seats
-            </p>
+            <p className="text-xs text-[hsl(181_100%_9%/0.45)] mb-5">Fill in your information to reserve seats</p>
             <div className="flex flex-col gap-4">
-              <InputField
-                label="Full Name"
-                id="name"
-                value={form.name}
+              <InputField label="Full Name" id="name" value={form.name}
                 onChange={(v) => setForm((f) => ({ ...f, name: v }))}
-                placeholder="Enter your full name"
-                error={errors.name as string | undefined}
-                required
-              />
-              <InputField
-                label="Mobile Number"
-                id="phone"
-                type="tel"
-                value={form.phone}
+                placeholder="Enter your full name" error={errors.name as string | undefined} required />
+              <InputField label="Mobile Number" id="phone" type="tel" value={form.phone}
                 onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
-                placeholder="10-digit mobile number"
-                error={errors.phone as string | undefined}
-                required
-              />
-              <InputField
-                label="Email Address"
-                id="email"
-                type="email"
-                value={form.email}
+                placeholder="10-digit mobile number" error={errors.phone as string | undefined} required />
+              <InputField label="Email Address" id="email" type="email" value={form.email}
                 onChange={(v) => setForm((f) => ({ ...f, email: v }))}
-                placeholder="you@example.com"
-                error={errors.email as string | undefined}
-                required
-              />
+                placeholder="you@example.com" error={errors.email as string | undefined} required />
 
               {/* Ticket count stepper */}
               <div className="flex flex-col gap-1.5">
@@ -453,23 +605,17 @@ function BookingPageInner() {
                   Number of Tickets <span className="text-red-400">*</span>
                 </label>
                 <div className="flex items-center gap-3">
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={() => setForm((f) => ({ ...f, ticket_count: Math.max(1, f.ticket_count - 1) }))}
-                    className="w-10 h-10 rounded-xl border border-[hsl(181_100%_9%/0.12)] flex items-center justify-center text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] active:scale-95 transition-all font-bold text-lg"
-                  >
+                    className="w-10 h-10 rounded-xl border border-[hsl(181_100%_9%/0.12)] flex items-center justify-center text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] active:scale-95 transition-all font-bold text-lg">
                     −
                   </button>
                   <span className="w-10 text-center font-black text-[hsl(181_100%_9%)] text-lg tabular-nums">
                     {form.ticket_count}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm((f) => ({ ...f, ticket_count: Math.min(MAX_TICKETS, f.ticket_count + 1) }))
-                    }
-                    className="w-10 h-10 rounded-xl border border-[hsl(181_100%_9%/0.12)] flex items-center justify-center text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] active:scale-95 transition-all font-bold text-lg"
-                  >
+                  <button type="button"
+                    onClick={() => setForm((f) => ({ ...f, ticket_count: Math.min(MAX_TICKETS, f.ticket_count + 1) }))}
+                    className="w-10 h-10 rounded-xl border border-[hsl(181_100%_9%/0.12)] flex items-center justify-center text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] active:scale-95 transition-all font-bold text-lg">
                     +
                   </button>
                   <span className="text-sm text-[hsl(181_100%_9%)] font-medium">
@@ -483,15 +629,11 @@ function BookingPageInner() {
             </div>
           </div>
 
-          {/* Ticket info note */}
           <div className="mx-5 my-4 flex gap-2.5 bg-[hsl(181_100%_9%/0.04)] border border-[hsl(181_100%_9%/0.07)] rounded-xl px-4 py-3">
-            <span className="material-symbols-outlined text-[hsl(181_100%_9%/0.4)] text-sm flex-shrink-0 mt-0.5">
-              info
-            </span>
+            <span className="material-symbols-outlined text-[hsl(181_100%_9%/0.4)] text-sm flex-shrink-0 mt-0.5">info</span>
             <p className="text-xs text-[hsl(181_100%_9%/0.55)] leading-relaxed">
               <span className="font-bold text-[hsl(181_100%_9%)]">Ticket Allotment: </span>
-              Tickets will be allotted prior to the event and the details will be sent to your
-              registered email or phone number.
+              Tickets will be allotted prior to the event and the details will be sent to your registered email or phone number.
             </p>
           </div>
 
@@ -502,11 +644,8 @@ function BookingPageInner() {
           )}
 
           <div className="px-5 pb-5">
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white font-bold text-sm hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)] disabled:opacity-60"
-            >
+            <button onClick={handleSubmit} disabled={submitting}
+              className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white font-bold text-sm hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)] disabled:opacity-60">
               {submitting ? (
                 <>
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -526,14 +665,14 @@ function BookingPageInner() {
         </div>
       </div>
 
-      {/* Payment modal */}
       {step === "payment" && (
         <PaymentModal
           ticketType={ticketType}
           ticketCount={form.ticket_count}
           bookingId={bookingId}
           phone={form.phone}
-          onSuccess={() => setStep("success")}
+          email={form.email}
+          onSuccess={handlePaymentSuccess}
           onClose={() => setStep("form")}
         />
       )}
