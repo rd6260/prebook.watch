@@ -2,27 +2,79 @@
 
 import { useRouter } from "next/navigation";
 
+// ---------------------------------------------------------------------------
+// Data model
+// ---------------------------------------------------------------------------
+
+type PremiereType = "Industry" | "Public" | "Special Matinee";
+
 type Premiere = {
-  type: "Industry" | "Public";
+  type: PremiereType;
   label: string;
   date: string;
   time: string;
+  /** Icon name from Material Symbols */
+  icon: string;
+  description: string;
 };
 
-const PREMIERES: Premiere[] = [
-  {
-    type: "Industry",
-    label: "Industry Premiere",
-    date: "Wednesday, April 8",
-    time: "7:30 pm onwards",
+type CityConfig = {
+  /** Exact display name used in headings */
+  displayName: string;
+  shows: Premiere[];
+};
+
+const CITY_CONFIGS: Record<string, CityConfig> = {
+  bhubaneswar: {
+    displayName: "Bhubaneswar",
+    shows: [
+      {
+        type: "Industry",
+        label: "Industry Premiere",
+        date: "Friday, April 11",
+        time: "7:30 pm onwards",
+        icon: "groups",
+        description:
+          "An exclusive first screening in the presence of the Cast, Crew, and esteemed members of the film fraternity.",
+      },
+      {
+        type: "Public",
+        label: "Public Premiere",
+        date: "Thursday, April 9",
+        time: "7:00 pm onwards",
+        icon: "groups",
+        description: "A special screening with the Cast & Crew in attendance.",
+      },
+    ],
   },
-  {
-    type: "Public",
-    label: "Public Premiere",
-    date: "Thursday, April 9",
-    time: "7:00 pm onwards",
+
+  cuttack: {
+    displayName: "Cuttack",
+    shows: [
+      {
+        type: "Special Matinee",
+        label: "Special Matinee Show",
+        date: "Thursday, April 9",
+        time: "3:00 pm onwards",
+        icon: "wb_sunny",
+        description: "Special Matinee Show",
+      },
+    ],
   },
-];
+
+  // -------------------------------------------------------------------------
+  // Add more cities here, e.g.:
+  //
+  // sambalpur: {
+  //   displayName: "Sambalpur",
+  //   shows: [ ... ],
+  // },
+  // -------------------------------------------------------------------------
+};
+
+// ---------------------------------------------------------------------------
+// Components
+// ---------------------------------------------------------------------------
 
 interface PremiereCardProps {
   premiere: Premiere;
@@ -31,13 +83,11 @@ interface PremiereCardProps {
 }
 
 function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
-  const isIndustry = premiere.type === "Industry";
-
   return (
     <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden flex flex-col">
       <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
 
-        {/* Header row: label pill + type indicator */}
+        {/* Header row: label pill + dot */}
         <div className="flex items-center justify-between mb-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)]">
             {premiere.label}
@@ -47,31 +97,24 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
 
         {/* Title */}
         <h3 className="font-black text-[hsl(181_100%_9%)] text-lg leading-tight mb-0.5">
-          Bindusagar — {isIndustry ? "Industry" : "Public"} Premiere
+          Bindusagar — {premiere.label}
         </h3>
         <p className="text-sm font-semibold text-[hsl(181_100%_9%/0.5)] mb-1">
           {cityName}
         </p>
 
-        {/* Cast & crew note */}
-        {isIndustry ? (
-          <div className="mb-4 flex items-start gap-1.5">
-            <span className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]" style={{ lineHeight: '1.4' }}>groups</span>
-            <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] leading-relaxed">
-              An exclusive first screening in the presence of the Cast, Crew, and esteemed members of the film fraternity.
-            </p>
-          </div>
-        ) : (
-          <div className="mb-4 flex items-center gap-1.5">
-            <span className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]">groups</span>
-            <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)]">
-              A special screening with the Cast &amp; Crew in attendance.
-            </p>
-          </div>
-        )}
-
-        {/* Spacer for Public card to align divider */}
-        {!isIndustry && <div className="mb-4" />}
+        {/* Description */}
+        <div className="mb-4 flex items-start gap-1.5">
+          <span
+            className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]"
+            style={{ lineHeight: "1.4" }}
+          >
+            {premiere.icon}
+          </span>
+          <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] leading-relaxed">
+            {premiere.description}
+          </p>
+        </div>
 
         {/* Divider */}
         <div className="h-px bg-[hsl(181_100%_9%/0.07)] mb-4" />
@@ -79,12 +122,20 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         {/* Date + time */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-wider text-[hsl(181_100%_9%/0.35)] mb-1">Date</p>
-            <p className="text-sm font-bold text-[hsl(181_100%_9%)]">{premiere.date}</p>
+            <p className="text-[10px] font-black uppercase tracking-wider text-[hsl(181_100%_9%/0.35)] mb-1">
+              Date
+            </p>
+            <p className="text-sm font-bold text-[hsl(181_100%_9%)]">
+              {premiere.date}
+            </p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[hsl(181_100%_9%/0.35)] mb-1">Time</p>
-            <p className="text-sm font-bold text-[hsl(181_100%_9%)]">{premiere.time}</p>
+            <p className="text-[10px] font-black uppercase tracking-wider text-[hsl(181_100%_9%/0.35)] mb-1">
+              Time
+            </p>
+            <p className="text-sm font-bold text-[hsl(181_100%_9%)]">
+              {premiere.time}
+            </p>
           </div>
         </div>
 
@@ -93,12 +144,14 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
           Free Seating · Seats Will Be Allotted Prior to the Event
         </p>
 
-        {/* Book Now — pushed to bottom */}
+        {/* Book Now */}
         <button
           onClick={onBook}
           className="mt-5 w-full py-3 rounded-xl font-bold text-sm bg-[hsl(181_100%_9%)] text-white hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
         >
-          <span className="material-symbols-outlined text-base">confirmation_number</span>
+          <span className="material-symbols-outlined text-base">
+            confirmation_number
+          </span>
           Book Now
         </button>
       </div>
@@ -106,16 +159,38 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
   );
 }
 
+// ---------------------------------------------------------------------------
+
 interface PremiereListProps {
+  /** Pass the city key (case-insensitive), e.g. "Bhubaneswar" or "bhubaneswar" */
   cityName: string;
 }
 
 export default function PremiereList({ cityName }: PremiereListProps) {
   const router = useRouter();
 
-  function handleBook(premiere: Premiere) {
-    router.push(`/book?type=${encodeURIComponent(premiere.type)}`);
+  const key = cityName.trim().toLowerCase();
+  const config = CITY_CONFIGS[key];
+
+  if (!config) {
+    // Graceful fallback if city isn't configured yet
+    return (
+      <p className="mt-5 text-sm text-[hsl(181_100%_9%/0.5)]">
+        No screenings configured for <strong>{cityName}</strong> yet.
+      </p>
+    );
   }
+
+  function handleBook(premiere: Premiere) {
+    // Pass both type and city as URL params so the booking page
+    // never has to rely solely on localStorage.
+    router.push(
+      `/book?type=${encodeURIComponent(premiere.type)}&city=${encodeURIComponent(config.displayName)}`
+    );
+  }
+
+  const { displayName, shows } = config;
+  const isOddCount = shows.length % 2 !== 0;
 
   return (
     <div className="mt-5 w-full max-w-7xl mx-auto sm:px-2">
@@ -127,21 +202,28 @@ export default function PremiereList({ cityName }: PremiereListProps) {
             Screenings in
           </p>
           <h2 className="text-xl font-black text-[hsl(181_100%_9%)] leading-tight">
-            {cityName}
+            {displayName}
           </h2>
         </div>
       </div>
 
-      {/* Cards — stacked on mobile, side-by-side on sm+ */}
+      {/* Cards grid — 2 columns on sm+; last card in an odd list stays narrow */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {PREMIERES.map((p) => (
-          <PremiereCard
-            key={p.type}
-            premiere={p}
-            cityName={cityName}
-            onBook={() => handleBook(p)}
-          />
-        ))}
+        {shows.map((show, i) => {
+          const isLastOdd = isOddCount && i === shows.length - 1;
+          return (
+            <div
+              key={`${show.type}-${i}`}
+              className={isLastOdd ? "sm:col-span-2 sm:max-w-sm" : ""}
+            >
+              <PremiereCard
+                premiere={show}
+                cityName={displayName}
+                onBook={() => handleBook(show)}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Venue note */}
@@ -150,8 +232,9 @@ export default function PremiereList({ cityName }: PremiereListProps) {
           info
         </span>
         <p className="text-xs text-[hsl(181_100%_9%/0.6)] leading-relaxed">
-          <span className="font-bold text-[hsl(181_100%_9%)]">Note:</span> Venue and other details
-          will be sent to your registered mobile number two days before the premiere.
+          <span className="font-bold text-[hsl(181_100%_9%)]">Note:</span>{" "}
+          Venue and other details will be sent to your registered mobile number
+          two days before the premiere.
         </p>
       </div>
     </div>

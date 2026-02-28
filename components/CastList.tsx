@@ -50,6 +50,12 @@ const cast: CastMember[] = [
     role: "",
     picture: "https://media.themoviedb.org/t/p/w300_and_h450_face/dUb0wxZJwXKsUWHG3UIZPFnInyp.jpg",
   },
+  {
+    id: "8",
+    name: "Kishor Kumar Swain",
+    role: "",
+    picture: "/cast_and_crew/kishor-kumar-swain.jpeg",
+  },
 ];
 
 const INITIALS_COLORS = [

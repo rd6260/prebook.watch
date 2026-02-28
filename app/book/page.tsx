@@ -5,17 +5,35 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 // ─── Config ────────────────────────────────────────────────────────────────
-const MAX_TICKETS = 25;
 
 const TICKET_PRICES: Record<string, number> = {
   Industry: 400,
   Public: 350,
+  Matinee: 350,
 };
 
 const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Wednesday, April 8",
+  Industry: "Friday, April 11",
   Public: "Thursday, April 9",
+  Matinee: "Thursday, April 9",
 };
+
+/**
+ * Maximum tickets available per city + show type combination.
+ * Keys are lowercase: `${city.toLowerCase()}:${type}`
+ */
+const TICKET_LIMITS: Record<string, number> = {
+  "bhubaneswar:industry": 300,
+  "bhubaneswar:public": 1200,
+  "cuttack:matinee": 200,
+};
+
+const GLOBAL_MAX_PER_BOOKING = 25;
+
+function getTicketLimit(city: string, type: string): number {
+  const key = `${city.trim().toLowerCase()}:${type.toLowerCase()}`;
+  return TICKET_LIMITS[key] ?? GLOBAL_MAX_PER_BOOKING;
+}
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type BookingForm = {
@@ -39,6 +57,7 @@ type SuccessDetails = {
   name: string;
   email: string;
   phone: string;
+  city: string;
   ticketType: string;
   ticketCount: number;
   totalAmount: number;
@@ -84,20 +103,11 @@ function formatDateTime(date: Date): string {
 function formatPaymentMethod(p: PaymentDetails): { label: string; sub: string | null } {
   switch (p.method) {
     case "card":
-      return {
-        label: p.card_network ? `${p.card_network} Card` : "Card",
-        sub: null,
-      };
+      return { label: p.card_network ? `${p.card_network} Card` : "Card", sub: null };
     case "upi":
-      return {
-        label: "UPI",
-        sub: p.vpa ?? null,
-      };
+      return { label: "UPI", sub: p.vpa ?? null };
     case "netbanking":
-      return {
-        label: "Net Banking",
-        sub: p.bank ?? null,
-      };
+      return { label: "Net Banking", sub: p.bank ?? null };
     case "wallet":
       return {
         label: p.wallet
@@ -347,7 +357,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
 
-      // ── helpers ──────────────────────────────────────────────────────────
       function roundRect(x: number, y: number, w: number, h: number, r: number) {
         ctx.beginPath();
         ctx.moveTo(x + r, y);
@@ -373,11 +382,8 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       function value(text: string, x: number, y: number, maxW?: number) {
         ctx.font = "700 30px system-ui, sans-serif";
         ctx.fillStyle = DARK;
-        if (maxW) {
-          ctx.fillText(text, x, y, maxW);
-        } else {
-          ctx.fillText(text, x, y);
-        }
+        if (maxW) ctx.fillText(text, x, y, maxW);
+        else ctx.fillText(text, x, y);
       }
 
       function divider(y: number) {
@@ -389,15 +395,15 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
         ctx.stroke();
       }
 
-      // ── measure total height first ────────────────────────────────────────
       const rows = [
-        { label: "NAME",             val: details.name },
-        { label: "EMAIL",            val: details.email },
-        { label: "MOBILE",           val: `+91 ${details.phone}` },
-        { label: "PREMIERE DATE",    val: premiereDate },
-        { label: "TICKETS",          val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
-        { label: "TICKET TYPE",      val: `${details.ticketType} Premiere` },
-        { label: "BOOKED AT",        val: formatDateTime(details.bookedAt) },
+        { label: "NAME",          val: details.name },
+        { label: "EMAIL",         val: details.email },
+        { label: "MOBILE",        val: `+91 ${details.phone}` },
+        { label: "CITY",          val: details.city },
+        { label: "PREMIERE DATE", val: premiereDate },
+        { label: "TICKETS",       val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
+        { label: "TICKET TYPE",   val: `${details.ticketType} Premiere` },
+        { label: "BOOKED AT",     val: formatDateTime(details.bookedAt) },
       ];
 
       const HEADER_H = 110;
@@ -405,7 +411,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       const FOOTER_H = 130;
       const TOP_PAD = 60;
       const BOTTOM_PAD = 60;
-
       const totalH = TOP_PAD + HEADER_H + rows.length * ROW_H + 24 + FOOTER_H + BOTTOM_PAD;
 
       canvas.width = W * 2;
@@ -414,11 +419,9 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       canvas.style.height = `${totalH}px`;
       ctx.scale(2, 2);
 
-      // ── background ────────────────────────────────────────────────────────
       ctx.fillStyle = "#f4f5f5";
       ctx.fillRect(0, 0, W, totalH);
 
-      // ── card ──────────────────────────────────────────────────────────────
       const cardX = PAD;
       const cardY = TOP_PAD;
       const cardW = COL;
@@ -434,9 +437,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
 
-      // ── card header ───────────────────────────────────────────────────────
       roundRect(cardX, cardY, cardW, HEADER_H, RADIUS);
-      // only round top corners — fill a rect over the bottom half to square it
       ctx.fillStyle = DARK;
       ctx.fill();
       ctx.fillRect(cardX, cardY + HEADER_H / 2, cardW, HEADER_H / 2);
@@ -451,7 +452,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       ctx.font = "800 30px system-ui, sans-serif";
       ctx.fillText(`Bindusagar — ${details.ticketType} Premiere`, cardX + 32, cardY + 78);
 
-      // ── rows ──────────────────────────────────────────────────────────────
       let y = cardY + HEADER_H + 18;
       rows.forEach((row, i) => {
         label(row.label, cardX + 32, y + 24);
@@ -460,7 +460,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
         y += ROW_H;
       });
 
-      // ── footer ────────────────────────────────────────────────────────────
       const footerY = y + 16;
       roundRect(cardX + 16, footerY, cardW - 32, FOOTER_H - 16, 14);
       ctx.fillStyle = "rgba(1,45,47,0.04)";
@@ -470,7 +469,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       roundRect(cardX + 16, footerY, cardW - 32, FOOTER_H - 16, 14);
       ctx.stroke();
 
-      // amount
       ctx.fillStyle = "rgba(1,45,47,0.4)";
       ctx.font = "600 20px system-ui, sans-serif";
       ctx.letterSpacing = "2px";
@@ -480,7 +478,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       ctx.font = "800 40px system-ui, sans-serif";
       ctx.fillText(`₹${details.totalAmount.toLocaleString("en-IN")}`, cardX + 36, footerY + 78);
 
-      // payment badge
       const badgeLabel = paymentLabel ? paymentLabel.label : "Online";
       ctx.font = "700 24px system-ui, sans-serif";
       const bw = ctx.measureText(badgeLabel).width + 32;
@@ -504,7 +501,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
         ctx.fillText(details.paymentId, cardX + 36, footerY + FOOTER_H - 20);
       }
 
-      // ── download ──────────────────────────────────────────────────────────
       const dataUrl = canvas.toDataURL("image/jpeg", 0.96);
       const link = document.createElement("a");
       link.href = dataUrl;
@@ -536,7 +532,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
   return (
     <div className="min-h-screen bg-[hsl(181_5%_97%)] flex flex-col items-center justify-start pt-10 pb-16 px-4">
       <div id="booking-confirmation" className="w-full max-w-md">
-        {/* Icon + heading */}
         <div className="text-center mb-7">
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
             <span className="material-symbols-outlined text-3xl text-emerald-600">check_circle</span>
@@ -547,9 +542,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
           </p>
         </div>
 
-        {/* Booking summary card */}
         <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden mb-4">
-          {/* Card header */}
           <div className="bg-[hsl(181_100%_9%)] px-5 py-4 flex items-center gap-3">
             <span className="material-symbols-outlined text-white/70 text-lg">confirmation_number</span>
             <div>
@@ -560,20 +553,18 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
             </div>
           </div>
 
-          {/* Rows */}
           <div className="px-5 pt-1 pb-2">
-            <Row icon="person"               label="Name"               value={details.name} />
-            <Row icon="mail"                 label="Email"              value={details.email} />
-            <Row icon="smartphone"           label="Mobile"             value={`+91 ${details.phone}`} />
-            <Row icon="event"                label="Premiere Date"      value={premiereDate} />
-            <Row icon="confirmation_number"  label="Number of Tickets"  value={`${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}`} />
-            <Row icon="movie"                label="Ticket Type"        value={`${details.ticketType} Premiere`} />
-            <Row icon="schedule"             label="Booked At"          value={formatDateTime(details.bookedAt)} />
+            <Row icon="person"              label="Name"              value={details.name} />
+            <Row icon="mail"                label="Email"             value={details.email} />
+            <Row icon="smartphone"          label="Mobile"            value={`+91 ${details.phone}`} />
+            <Row icon="location_on"         label="City"              value={details.city} />
+            <Row icon="event"               label="Premiere Date"     value={premiereDate} />
+            <Row icon="confirmation_number" label="Number of Tickets" value={`${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}`} />
+            <Row icon="movie"               label="Ticket Type"       value={`${details.ticketType} Premiere`} />
+            <Row icon="schedule"            label="Booked At"         value={formatDateTime(details.bookedAt)} />
           </div>
 
-          {/* Amount + Payment mode footer */}
           <div className="mx-4 mb-4 rounded-xl bg-[hsl(181_100%_9%/0.04)] border border-[hsl(181_100%_9%/0.08)] px-4 py-3.5 flex items-center justify-between gap-3">
-            {/* Amount */}
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)] mb-0.5">
                 Amount Paid
@@ -582,8 +573,6 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
                 ₹{details.totalAmount.toLocaleString("en-IN")}
               </p>
             </div>
-
-            {/* Payment mode */}
             <div className="text-right">
               <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)] mb-1">
                 Payment Mode
@@ -593,30 +582,23 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
                 {paymentLabel ? paymentLabel.label : "Online"}
               </span>
               {paymentLabel?.sub && (
-                <p className="text-[10px] text-[hsl(181_100%_9%/0.4)] font-medium mt-1">
-                  {paymentLabel.sub}
-                </p>
+                <p className="text-[10px] text-[hsl(181_100%_9%/0.4)] font-medium mt-1">{paymentLabel.sub}</p>
               )}
               {details.paymentId && (
-                <p className="text-[10px] text-[hsl(181_100%_9%/0.3)] font-medium mt-1 font-mono">
-                  {details.paymentId}
-                </p>
+                <p className="text-[10px] text-[hsl(181_100%_9%/0.3)] font-medium mt-1 font-mono">{details.paymentId}</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Venue note */}
-        <div id="booking-venue-note" className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+        <div className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
           <span className="material-symbols-outlined text-amber-500 text-base flex-shrink-0 mt-0.5">info</span>
           <p className="text-xs text-amber-800 leading-relaxed">
             <span className="font-bold">Note:</span> Venue and seat allotment details will be sent to your registered mobile number two days before the premiere.
           </p>
         </div>
 
-        {/* Save to Gallery button */}
         <button
-          id="save-img-btn"
           onClick={handleSaveImage}
           disabled={saving}
           className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)] disabled:opacity-60"
@@ -644,9 +626,36 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 function BookingPageInner() {
   const searchParams = useSearchParams();
-  const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry";
+  const router = useRouter();
+
+  // type comes from URL always
+  const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry" | "Matinee";
+
+  // city: prefer URL param, fall back to localStorage
+  const cityFromUrl = searchParams.get("city");
+  const [city, setCity] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cityFromUrl) {
+      // Sync URL city into localStorage so other parts of the app stay consistent
+      localStorage.setItem("preferredCity", cityFromUrl);
+      setCity(cityFromUrl);
+    } else {
+      const stored = localStorage.getItem("preferredCity");
+      if (!stored) {
+        router.replace("/");
+      } else {
+        setCity(stored);
+      }
+    }
+  }, [cityFromUrl, router]);
 
   const supabase = createClient();
+
+  const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
+
+  // Derive the per-show ticket limit once city is known
+  const maxTickets = city ? Math.min(getTicketLimit(city, ticketType), GLOBAL_MAX_PER_BOOKING) : GLOBAL_MAX_PER_BOOKING;
 
   const [form, setForm] = useState<BookingForm>({
     name: "",
@@ -661,19 +670,6 @@ function BookingPageInner() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
-  const [city, setCity] = useState<string | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const stored = localStorage.getItem("preferredCity");
-    if (!stored) {
-      router.replace("/");
-    } else {
-      setCity(stored);
-    }
-  }, [router]);
-
   function validate(): boolean {
     const e: Partial<Record<keyof BookingForm, string>> = {};
     if (!form.name.trim()) e.name = "Name is required";
@@ -681,8 +677,8 @@ function BookingPageInner() {
     else if (!/^[6-9]\d{9}$/.test(form.phone.trim())) e.phone = "Enter a valid 10-digit mobile number";
     if (!form.email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email address";
-    if (form.ticket_count < 1 || form.ticket_count > MAX_TICKETS) {
-      e.ticket_count = `Between 1 and ${MAX_TICKETS} tickets`;
+    if (form.ticket_count < 1 || form.ticket_count > maxTickets) {
+      e.ticket_count = `Between 1 and ${maxTickets} tickets`;
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -734,6 +730,7 @@ function BookingPageInner() {
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
+      city: city ?? "",
       ticketType,
       ticketCount: form.ticket_count,
       totalAmount,
@@ -743,7 +740,7 @@ function BookingPageInner() {
     });
     setStep("success");
 
-    // Send confirmation email — fire and forget, don't block the success screen
+    // Send confirmation email — fire and forget
     fetch("/api/sendBookingEmail", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -751,28 +748,23 @@ function BookingPageInner() {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
+        city,
         ticketType,
         ticketCount: form.ticket_count,
         totalAmount,
         bookedAt: bookedAt.toLocaleString("en-IN", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
+          weekday: "long", year: "numeric", month: "long", day: "numeric",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
         }),
         paymentId,
         paymentMethod: paymentDetails ? (() => {
           const p = paymentDetails!;
           switch (p.method) {
-            case "card":      return p.card_network ? `${p.card_network} Card` : "Card";
-            case "upi":       return p.vpa ? `UPI (${p.vpa})` : "UPI";
-            case "netbanking":return p.bank ? `Net Banking (${p.bank})` : "Net Banking";
-            case "wallet":    return p.wallet ? `${p.wallet} Wallet` : "Wallet";
-            default:          return p.method;
+            case "card":       return p.card_network ? `${p.card_network} Card` : "Card";
+            case "upi":        return p.vpa ? `UPI (${p.vpa})` : "UPI";
+            case "netbanking": return p.bank ? `Net Banking (${p.bank})` : "Net Banking";
+            case "wallet":     return p.wallet ? `${p.wallet} Wallet` : "Wallet";
+            default:           return p.method;
           }
         })() : null,
       }),
@@ -795,7 +787,7 @@ function BookingPageInner() {
           </button>
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)]">
-              Bindusagar
+              Bindusagar · {city}
             </p>
             <h1 className="text-base font-black text-[hsl(181_100%_9%)] leading-tight">
               {ticketType} Premiere · Book Tickets
@@ -805,15 +797,21 @@ function BookingPageInner() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-5">
-        {/* Price badge */}
-        <div className="flex items-center gap-2">
+        {/* Price + availability badges */}
+        <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 bg-[hsl(181_100%_9%)] text-white text-xs font-black px-3 py-1.5 rounded-full">
             <span className="material-symbols-outlined text-sm">confirmation_number</span>
             ₹{pricePerTicket} per ticket
           </span>
-          <span className="text-xs text-[hsl(181_100%_9%/0.4)] font-medium">
-            Max {MAX_TICKETS} tickets per booking
+          {/*
+          <span className="inline-flex items-center gap-1.5 bg-[hsl(181_100%_9%/0.06)] text-[hsl(181_100%_9%/0.7)] text-xs font-bold px-3 py-1.5 rounded-full">
+            <span className="material-symbols-outlined text-sm">event_seat</span>
+            {getTicketLimit(city, ticketType).toLocaleString("en-IN")} total seats
           </span>
+          <span className="text-xs text-[hsl(181_100%_9%/0.4)] font-medium">
+            Max {maxTickets} per booking
+          </span>
+          */}
         </div>
 
         {/* Form card */}
@@ -847,7 +845,7 @@ function BookingPageInner() {
                     {form.ticket_count}
                   </span>
                   <button type="button"
-                    onClick={() => setForm((f) => ({ ...f, ticket_count: Math.min(MAX_TICKETS, f.ticket_count + 1) }))}
+                    onClick={() => setForm((f) => ({ ...f, ticket_count: Math.min(maxTickets, f.ticket_count + 1) }))}
                     className="w-10 h-10 rounded-xl border border-[hsl(181_100%_9%/0.12)] flex items-center justify-center text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] active:scale-95 transition-all font-bold text-lg">
                     +
                   </button>

@@ -7,63 +7,75 @@ import PremiereList from "@/components/PremiereList";
 import { useState, useEffect, useRef } from "react";
 import CastList from "@/components/CastList";
 import Footer from "@/components/Footer";
-
-const DEFAULT_CITY = "Bhubaneswar";
+import CityPickerModal from "@/components/CitySelectionComponent";
 
 export default function Home() {
   const premiereRef = useRef<HTMLDivElement>(null);
+  const [cityModalOpen, setCityModalOpen] = useState(false);
 
-  // Initialize preferredCity synchronously from localStorage,
-  // falling back to DEFAULT_CITY. Also persist the default immediately.
-  const [preferredCity, setPreferredCity] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("preferredCity");
-      if (stored) return stored;
-      localStorage.setItem("preferredCity", DEFAULT_CITY);
-    }
-    return DEFAULT_CITY;
-  });
+  const [preferredCity, setPreferredCity] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ensure the default is written on first load (covers SSR/hydration gap)
-    if (!localStorage.getItem("preferredCity")) {
-      localStorage.setItem("preferredCity", DEFAULT_CITY);
-      setPreferredCity(DEFAULT_CITY);
-    }
+    // Read on mount so server and client start with the same null, then hydrate
+    const stored = localStorage.getItem("preferredCity");
+    if (stored) setPreferredCity(stored);
 
     const handleChange = () => {
-      const updated = localStorage.getItem("preferredCity") ?? DEFAULT_CITY;
+      const updated = localStorage.getItem("preferredCity");
       setPreferredCity(updated);
     };
     window.addEventListener("cityChanged", handleChange);
     return () => window.removeEventListener("cityChanged", handleChange);
   }, []);
 
-  // Both desktop and mobile "Book Now" scroll to the premiere list
-  const handleScrollToPremieres = () => {
+  const scrollToPremieres = () => {
     premiereRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  // "Book Now" in Hero: open city picker if no city, else scroll
+  const handleBookNow = () => {
+    if (!localStorage.getItem("preferredCity")) {
+      setCityModalOpen(true);
+    } else {
+      scrollToPremieres();
+    }
+  };
+
+  // Called by CityPickerModal after a city is selected
+  const handleCitySelected = () => {
+    const updated = localStorage.getItem("preferredCity");
+    setPreferredCity(updated);
+    // Scroll after modal close animation settles
+    setTimeout(scrollToPremieres, 260);
   };
 
   return (
     <div className="min-h-screen bg-background-light text-text-main font-display">
-      <Navbar />
+      <Navbar onCityClick={() => setCityModalOpen(true)} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Hero
-          onBookNow={handleScrollToPremieres}
-          onScrollToCinemaList={handleScrollToPremieres}
+          onBookNow={handleBookNow}
+          onScrollToCinemaList={handleBookNow}
         />
 
         {/* Premiere list — always visible */}
         <div ref={premiereRef}>
-          <PremiereList cityName={preferredCity} />
+          {preferredCity && <PremiereList cityName={preferredCity} />}
         </div>
 
         <Spotlight />
         <CastList />
         <div className="mb-30" />
       </main>
-      <Footer/>
+
+      <Footer />
+
+      <CityPickerModal
+        isOpen={cityModalOpen}
+        onClose={() => setCityModalOpen(false)}
+        onCitySelected={handleCitySelected}
+      />
     </div>
   );
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import CityPickerModal from "@/components/CitySelectionComponent";
 
-export default function Navbar() {
-  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+interface NavbarProps {
+  onCityClick?: () => void;
+}
+
+export default function Navbar({ onCityClick }: NavbarProps) {
   const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,25 +24,15 @@ export default function Navbar() {
 
   return (
     <>
-      <CityPickerModal
-        isOpen={cityPickerOpen}
-        onClose={() => {
-          setCityPickerOpen(false);
-          // Re-read city in case it was updated
-          const updated = localStorage.getItem("preferredCity");
-          setCity(updated);
-        }}
-      />
       <header className="sticky top-0 z-50 w-full border-b border-[hsl(181_54%_37%/0.15)] bg-[hsl(180_88%_90%/0.85)] backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* */}
             <div className="flex items-center gap-8 flex-1">
 
-              {/*
               <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
                 <button
-                  onClick={() => setCityPickerOpen(true)}
+                  onClick={onCityClick}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[hsl(181_100%_9%/0.06)] hover:bg-[hsl(181_100%_9%/0.12)] transition-all"
                 >
                   <span className="material-symbols-outlined text-xl">location_on</span>
@@ -50,7 +42,6 @@ export default function Navbar() {
                   <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
                 </button>
               </div>
-            */}
               {/* 
 
               <div className="hidden md:flex flex-1 max-w-md">
@@ -71,7 +62,7 @@ export default function Navbar() {
             {/* Nav & Actions */}
             <div className="flex ml-6 items-center gap-6">
               {/* Desktop: centered absolutely */}
-              <div className="md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
+              <div className="flex md:absolute md:left-1/2 md:-translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
                 <div className="flex flex-col items-center">
                   <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
                   <span className="text-[12px] font-medium tracking-wide text-[hsl(181_100%_9%/0.55)] -mt-0.5">BE THE FIRST TO WATCH</span>
