@@ -333,36 +333,188 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
     ? formatPaymentMethod(details.paymentDetails)
     : null;
 
-  function handleSavePDF() {
-    const styleId = "booking-print-style";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.innerHTML = `
-        @media print {
-          @page { margin: 12mm; size: A4 portrait; }
-          html, body {
-            height: auto !important;
-            overflow: visible !important;
-          }
-          body * { visibility: hidden !important; }
-          #booking-confirmation, #booking-confirmation * { visibility: visible !important; }
-          #booking-confirmation {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-          }
-          #save-pdf-btn { display: none !important; }
-          #booking-venue-note { display: none !important; }
+  const [saving, setSaving] = useState(false);
+
+  async function handleSaveImage() {
+    setSaving(true);
+    try {
+      const DARK = "#012d2f";
+      const W = 900;
+      const PAD = 48;
+      const COL = W - PAD * 2;
+      const RADIUS = 20;
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+
+      // ── helpers ──────────────────────────────────────────────────────────
+      function roundRect(x: number, y: number, w: number, h: number, r: number) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function label(text: string, x: number, y: number) {
+        ctx.font = "600 22px system-ui, sans-serif";
+        ctx.fillStyle = "rgba(1,45,47,0.4)";
+        ctx.letterSpacing = "2px";
+        ctx.fillText(text.toUpperCase(), x, y);
+        ctx.letterSpacing = "0px";
+      }
+
+      function value(text: string, x: number, y: number, maxW?: number) {
+        ctx.font = "700 30px system-ui, sans-serif";
+        ctx.fillStyle = DARK;
+        if (maxW) {
+          ctx.fillText(text, x, y, maxW);
+        } else {
+          ctx.fillText(text, x, y);
         }
-      `;
-      document.head.appendChild(style);
+      }
+
+      function divider(y: number) {
+        ctx.beginPath();
+        ctx.moveTo(PAD, y);
+        ctx.lineTo(W - PAD, y);
+        ctx.strokeStyle = "rgba(1,45,47,0.07)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // ── measure total height first ────────────────────────────────────────
+      const rows = [
+        { label: "NAME",             val: details.name },
+        { label: "EMAIL",            val: details.email },
+        { label: "MOBILE",           val: `+91 ${details.phone}` },
+        { label: "PREMIERE DATE",    val: premiereDate },
+        { label: "TICKETS",          val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
+        { label: "TICKET TYPE",      val: `${details.ticketType} Premiere` },
+        { label: "BOOKED AT",        val: formatDateTime(details.bookedAt) },
+      ];
+
+      const HEADER_H = 110;
+      const ROW_H = 90;
+      const FOOTER_H = 130;
+      const TOP_PAD = 60;
+      const BOTTOM_PAD = 60;
+
+      const totalH = TOP_PAD + HEADER_H + rows.length * ROW_H + 24 + FOOTER_H + BOTTOM_PAD;
+
+      canvas.width = W * 2;
+      canvas.height = totalH * 2;
+      canvas.style.width = `${W}px`;
+      canvas.style.height = `${totalH}px`;
+      ctx.scale(2, 2);
+
+      // ── background ────────────────────────────────────────────────────────
+      ctx.fillStyle = "#f4f5f5";
+      ctx.fillRect(0, 0, W, totalH);
+
+      // ── card ──────────────────────────────────────────────────────────────
+      const cardX = PAD;
+      const cardY = TOP_PAD;
+      const cardW = COL;
+      const cardH = totalH - TOP_PAD - BOTTOM_PAD;
+
+      ctx.shadowColor = "rgba(1,45,47,0.10)";
+      ctx.shadowBlur = 32;
+      ctx.shadowOffsetY = 8;
+      roundRect(cardX, cardY, cardW, cardH, RADIUS);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // ── card header ───────────────────────────────────────────────────────
+      roundRect(cardX, cardY, cardW, HEADER_H, RADIUS);
+      // only round top corners — fill a rect over the bottom half to square it
+      ctx.fillStyle = DARK;
+      ctx.fill();
+      ctx.fillRect(cardX, cardY + HEADER_H / 2, cardW, HEADER_H / 2);
+
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "600 20px system-ui, sans-serif";
+      ctx.letterSpacing = "3px";
+      ctx.fillText("BOOKING DETAILS", cardX + 32, cardY + 38);
+      ctx.letterSpacing = "0px";
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 30px system-ui, sans-serif";
+      ctx.fillText(`Bindusagar — ${details.ticketType} Premiere`, cardX + 32, cardY + 78);
+
+      // ── rows ──────────────────────────────────────────────────────────────
+      let y = cardY + HEADER_H + 18;
+      rows.forEach((row, i) => {
+        label(row.label, cardX + 32, y + 24);
+        value(row.val, cardX + 32, y + 56, cardW - 64);
+        if (i < rows.length - 1) divider(y + ROW_H);
+        y += ROW_H;
+      });
+
+      // ── footer ────────────────────────────────────────────────────────────
+      const footerY = y + 16;
+      roundRect(cardX + 16, footerY, cardW - 32, FOOTER_H - 16, 14);
+      ctx.fillStyle = "rgba(1,45,47,0.04)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(1,45,47,0.08)";
+      ctx.lineWidth = 1.5;
+      roundRect(cardX + 16, footerY, cardW - 32, FOOTER_H - 16, 14);
+      ctx.stroke();
+
+      // amount
+      ctx.fillStyle = "rgba(1,45,47,0.4)";
+      ctx.font = "600 20px system-ui, sans-serif";
+      ctx.letterSpacing = "2px";
+      ctx.fillText("AMOUNT PAID", cardX + 36, footerY + 34);
+      ctx.letterSpacing = "0px";
+      ctx.fillStyle = DARK;
+      ctx.font = "800 40px system-ui, sans-serif";
+      ctx.fillText(`₹${details.totalAmount.toLocaleString("en-IN")}`, cardX + 36, footerY + 78);
+
+      // payment badge
+      const badgeLabel = paymentLabel ? paymentLabel.label : "Online";
+      ctx.font = "700 24px system-ui, sans-serif";
+      const bw = ctx.measureText(badgeLabel).width + 32;
+      const bx = cardX + cardW - 32 - bw;
+      const by = footerY + 30;
+      roundRect(bx, by, bw, 42, 21);
+      ctx.fillStyle = "#d1fae5";
+      ctx.fill();
+      ctx.fillStyle = "#065f46";
+      ctx.fillText(badgeLabel, bx + 16, by + 28);
+
+      if (paymentLabel?.sub) {
+        ctx.fillStyle = "rgba(1,45,47,0.4)";
+        ctx.font = "500 20px system-ui, sans-serif";
+        ctx.fillText(paymentLabel.sub, bx, by + 60);
+      }
+
+      if (details.paymentId) {
+        ctx.fillStyle = "rgba(1,45,47,0.28)";
+        ctx.font = "500 18px monospace";
+        ctx.fillText(details.paymentId, cardX + 36, footerY + FOOTER_H - 20);
+      }
+
+      // ── download ──────────────────────────────────────────────────────────
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.96);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `bindusagar-booking-${details.name.replace(/\s+/g, "-").toLowerCase()}.jpg`;
+      link.click();
+    } catch (err) {
+      console.error("Failed to save image:", err);
+    } finally {
+      setSaving(false);
     }
-    window.print();
   }
 
   function Row({ icon, label, value }: { icon: string; label: string; value: string }) {
@@ -462,14 +614,27 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
           </p>
         </div>
 
-        {/* Save as PDF button */}
+        {/* Save to Gallery button */}
         <button
-          id="save-pdf-btn"
-          onClick={handleSavePDF}
-          className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)]"
+          id="save-img-btn"
+          onClick={handleSaveImage}
+          disabled={saving}
+          className="w-full py-3.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-[hsl(181_100%_9%/0.15)] disabled:opacity-60"
         >
-          <span className="material-symbols-outlined text-base">download</span>
-          Save as PDF
+          {saving ? (
+            <>
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+              </svg>
+              Saving…
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-base">image</span>
+              Save to Gallery
+            </>
+          )}
         </button>
       </div>
     </div>
