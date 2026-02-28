@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Contact Us */}
           <Link
-            href="/contact"
+            href="/contact-us"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[hsl(181_100%_9%/0.15)] text-sm font-bold text-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_9%/0.05)] transition-all"
           >
             <span className="material-symbols-outlined text-base">mail</span>
