@@ -53,12 +53,21 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
           {cityName}
         </p>
 
-        {/* Cast & crew note — only for Industry premiere */}
-        {isIndustry && (
-          <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] mb-4 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-sm leading-none">groups</span>
-            To be attended by the cast &amp; crew
-          </p>
+        {/* Cast & crew note */}
+        {isIndustry ? (
+          <div className="mb-4 flex items-start gap-1.5">
+            <span className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]" style={{ lineHeight: '1.4' }}>groups</span>
+            <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] leading-relaxed">
+              An exclusive first screening in the presence of the Cast, Crew, and esteemed members of the film fraternity.
+            </p>
+          </div>
+        ) : (
+          <div className="mb-4 flex items-center gap-1.5">
+            <span className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]">groups</span>
+            <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)]">
+              A special screening with the Cast &amp; Crew in attendance.
+            </p>
+          </div>
         )}
 
         {/* Spacer for Public card to align divider */}

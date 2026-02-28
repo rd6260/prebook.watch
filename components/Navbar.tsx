@@ -37,7 +37,7 @@ export default function Navbar() {
             {/* */}
             <div className="flex items-center gap-8 flex-1">
 
-            {/*
+              {/*
               <div className="flex items-center gap-2 text-[hsl(181_100%_9%)] cursor-pointer select-none">
                 <button
                   onClick={() => setCityPickerOpen(true)}
@@ -72,7 +72,10 @@ export default function Navbar() {
             <div className="flex ml-6 items-center gap-6">
               {/* Desktop: centered absolutely */}
               <div className="md:flex absolute left-1/2 -translate-x-1/2 items-center gap-3 border-l border-r border-[hsl(181_54%_37%/0.15)] px-6">
-                <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
+                <div className="flex flex-col items-center">
+                  <h1 className="text-2xl font-black tracking-tighter uppercase">Prebook</h1>
+                  <span className="text-[12px] font-medium tracking-wide text-[hsl(181_100%_9%/0.55)] -mt-0.5">BE THE FIRST TO WATCH</span>
+                </div>
               </div>
 
               {/* Mobile: stays in flow as before */}
