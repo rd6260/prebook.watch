@@ -83,7 +83,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); onScrollToCinemaList?.(); }}
-              className="flex items-center justify-center gap-2 w-[50%] py-2.5 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold text-sm hover:bg-slate-100 transition-all shadow-lg shadow-black/30"
+              className="flex items-center justify-center gap-2 w-auto py-2.5 px-6 bg-white text-[hsl(181_100%_6%)] rounded-xl font-bold text-sm hover:bg-slate-100 transition-all shadow-lg shadow-black/30"
             >
               <span className="material-symbols-outlined text-base">confirmation_number</span>
               PREBOOK NOW!
