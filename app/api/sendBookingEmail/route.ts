@@ -6,6 +6,7 @@ type EmailPayload = {
   name: string;
   email: string;
   phone: string;
+  city: string;
   ticketType: string;
   ticketCount: number;
   totalAmount: number;
@@ -16,8 +17,9 @@ type EmailPayload = {
 };
 
 const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Wednesday, April 8",
+  Industry: "Friday, April 8",
   Public: "Thursday, April 9",
+  "Cuttack Premiere": "Thursday, April 9",
 };
 
 function buildHtml(p: EmailPayload): string {
@@ -25,8 +27,9 @@ function buildHtml(p: EmailPayload): string {
     { label: "Name",             value: p.name },
     { label: "Email",            value: p.email },
     { label: "Mobile",           value: `+91 ${p.phone}` },
+    { label: "City",             value: p.city },
     { label: "Premiere Date",    value: p.premiereDate },
-    { label: "Ticket Type",      value: `${p.ticketType} Premiere` },
+    { label: "Ticket Type",      value: p.ticketType },
     { label: "No. of Tickets",   value: `${p.ticketCount} ticket${p.ticketCount > 1 ? "s" : ""}` },
     { label: "Amount Paid",      value: `₹${p.totalAmount.toLocaleString("en-IN")}` },
     { label: "Payment Mode",     value: p.paymentMethod ?? "Online" },
@@ -61,7 +64,7 @@ function buildHtml(p: EmailPayload): string {
           <tr>
             <td style="background:#012d2f;border-radius:16px 16px 0 0;padding:32px 32px 28px;">
               <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Booking Confirmed</p>
-              <h1 style="margin:0;font-size:24px;font-weight:900;color:#ffffff;line-height:1.2;">Bindusagar — ${p.ticketType} Premiere</h1>
+              <h1 style="margin:0;font-size:24px;font-weight:900;color:#ffffff;line-height:1.2;">Bindusagar — ${p.ticketType}</h1>
             </td>
           </tr>
 
@@ -119,7 +122,7 @@ function buildHtml(p: EmailPayload): string {
 }
 
 function buildText(p: EmailPayload): string {
-  return `BOOKING CONFIRMED — BINDUSAGAR ${p.ticketType.toUpperCase()} PREMIERE
+  return `BOOKING CONFIRMED — BINDUSAGAR ${p.ticketType.toUpperCase()}
 
 Hi ${p.name},
 
@@ -128,8 +131,9 @@ Your booking is confirmed! Here are your details:
 Name:            ${p.name}
 Email:           ${p.email}
 Mobile:          +91 ${p.phone}
+City:            ${p.city}
 Premiere Date:   ${p.premiereDate}
-Ticket Type:     ${p.ticketType} Premiere
+Ticket Type:     ${p.ticketType}
 No. of Tickets:  ${p.ticketCount}
 Amount Paid:     ₹${p.totalAmount.toLocaleString("en-IN")}
 Payment Mode:    ${p.paymentMethod ?? "Online"}
@@ -148,6 +152,7 @@ export async function POST(req: NextRequest) {
       name: string;
       email: string;
       phone: string;
+      city: string;
       ticketType: string;
       ticketCount: number;
       totalAmount: number;
@@ -156,7 +161,7 @@ export async function POST(req: NextRequest) {
       paymentMethod?: string | null;
     };
 
-    const { name, email, phone, ticketType, ticketCount, totalAmount, bookedAt, paymentId, paymentMethod } = body;
+    const { name, email, phone, city, ticketType, ticketCount, totalAmount, bookedAt, paymentId, paymentMethod } = body;
 
     if (!email || !name || !ticketType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -168,6 +173,7 @@ export async function POST(req: NextRequest) {
       name,
       email,
       phone,
+      city: city ?? "",
       ticketType,
       ticketCount,
       totalAmount,
@@ -185,9 +191,9 @@ export async function POST(req: NextRequest) {
         "X-Postmark-Server-Token": process.env.POSTMARK_SERVER_TOKEN!,
       },
       body: JSON.stringify({
-        From: process.env.POSTMARK_FROM_EMAIL,   // e.g. "Bindusagar <tickets@yourdomain.com>"
+        From: process.env.POSTMARK_FROM_EMAIL,
         To: email,
-        Subject: `Booking Confirmed — Bindusagar ${ticketType} Premiere`,
+        Subject: `Booking Confirmed — Bindusagar ${ticketType}`,
         HtmlBody: buildHtml(payload),
         TextBody: buildText(payload),
         MessageStream: "outbound",

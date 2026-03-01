@@ -9,23 +9,23 @@ import { createClient } from "@/lib/supabase/client";
 const TICKET_PRICES: Record<string, number> = {
   Industry: 400,
   Public: 350,
-  Matinee: 350,
+  "Cuttack Premiere": 350,
 };
 
 const PREMIERE_DATES: Record<string, string> = {
   Industry: "Wednesday, April 8",
   Public: "Thursday, April 9",
-  Matinee: "Thursday, April 9",
+  "Cuttack Premiere": "Thursday, April 9",
 };
 
 /**
  * Maximum tickets available per city + show type combination.
- * Keys are lowercase: `${city.toLowerCase()}:${type}`
+ * Keys are lowercase: `${city.toLowerCase()}:${type.toLowerCase()}`
  */
 const TICKET_LIMITS: Record<string, number> = {
   "bhubaneswar:industry": 300,
   "bhubaneswar:public": 1200,
-  "cuttack:matinee": 200,
+  "cuttack:cuttack premiere": 200,
 };
 
 const GLOBAL_MAX_PER_BOOKING = 25;
@@ -225,7 +225,7 @@ function PaymentModal({
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Bindusagar Premiere",
-        description: `${ticketType} Premiere · ${ticketCount} ticket${ticketCount > 1 ? "s" : ""}`,
+        description: `${ticketType} · ${ticketCount} ticket${ticketCount > 1 ? "s" : ""}`,
         order_id: orderData.razorpay_order_id,
         handler: async (response: {
           razorpay_order_id: string;
@@ -278,7 +278,7 @@ function PaymentModal({
           <div className="flex flex-col gap-2">
             <div className="flex justify-between text-sm">
               <span className="text-[hsl(181_100%_9%/0.55)] font-medium">
-                {ticketType} Premiere × {ticketCount} ticket{ticketCount > 1 ? "s" : ""}
+                {ticketType} × {ticketCount} ticket{ticketCount > 1 ? "s" : ""}
               </span>
               <span className="font-bold text-[hsl(181_100%_9%)]">
                 ₹{pricePerTicket} × {ticketCount}
@@ -402,7 +402,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
         { label: "CITY",          val: details.city },
         { label: "PREMIERE DATE", val: premiereDate },
         { label: "TICKETS",       val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
-        { label: "TICKET TYPE",   val: `${details.ticketType} Premiere` },
+        { label: "TICKET TYPE",   val: details.ticketType },
         { label: "BOOKED AT",     val: formatDateTime(details.bookedAt) },
       ];
 
@@ -450,7 +450,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "800 30px system-ui, sans-serif";
-      ctx.fillText(`Bindusagar — ${details.ticketType} Premiere`, cardX + 32, cardY + 78);
+      ctx.fillText(`Bindusagar — ${details.ticketType}`, cardX + 32, cardY + 78);
 
       let y = cardY + HEADER_H + 18;
       rows.forEach((row, i) => {
@@ -548,7 +548,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Booking Details</p>
               <p className="text-white font-black text-base leading-tight">
-                Bindusagar — {details.ticketType} Premiere
+                Bindusagar — {details.ticketType}
               </p>
             </div>
           </div>
@@ -560,7 +560,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
             <Row icon="location_on"         label="City"              value={details.city} />
             <Row icon="event"               label="Premiere Date"     value={premiereDate} />
             <Row icon="confirmation_number" label="Number of Tickets" value={`${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}`} />
-            <Row icon="movie"               label="Ticket Type"       value={`${details.ticketType} Premiere`} />
+            <Row icon="movie"               label="Ticket Type"       value={details.ticketType} />
             <Row icon="schedule"            label="Booked At"         value={formatDateTime(details.bookedAt)} />
           </div>
 
@@ -629,7 +629,7 @@ function BookingPageInner() {
   const router = useRouter();
 
   // type comes from URL always
-  const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry" | "Matinee";
+  const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry" | "Cuttack Premiere";
 
   // city: prefer URL param, fall back to localStorage
   const cityFromUrl = searchParams.get("city");
@@ -637,7 +637,6 @@ function BookingPageInner() {
 
   useEffect(() => {
     if (cityFromUrl) {
-      // Sync URL city into localStorage so other parts of the app stay consistent
       localStorage.setItem("preferredCity", cityFromUrl);
       setCity(cityFromUrl);
     } else {
@@ -654,7 +653,6 @@ function BookingPageInner() {
 
   const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
 
-  // Derive the per-show ticket limit once city is known
   const maxTickets = city ? Math.min(getTicketLimit(city, ticketType), GLOBAL_MAX_PER_BOOKING) : GLOBAL_MAX_PER_BOOKING;
 
   const [form, setForm] = useState<BookingForm>({
@@ -748,7 +746,7 @@ function BookingPageInner() {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
-        city,
+        city: city ?? "",
         ticketType,
         ticketCount: form.ticket_count,
         totalAmount,
@@ -790,28 +788,19 @@ function BookingPageInner() {
               Bindusagar · {city}
             </p>
             <h1 className="text-base font-black text-[hsl(181_100%_9%)] leading-tight">
-              {ticketType} Premiere · Book Tickets
+              {ticketType} · Book Tickets
             </h1>
           </div>
         </div>
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 flex flex-col gap-5">
-        {/* Price + availability badges */}
+        {/* Price badge */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 bg-[hsl(181_100%_9%)] text-white text-xs font-black px-3 py-1.5 rounded-full">
             <span className="material-symbols-outlined text-sm">confirmation_number</span>
             ₹{pricePerTicket} per ticket
           </span>
-          {/*
-          <span className="inline-flex items-center gap-1.5 bg-[hsl(181_100%_9%/0.06)] text-[hsl(181_100%_9%/0.7)] text-xs font-bold px-3 py-1.5 rounded-full">
-            <span className="material-symbols-outlined text-sm">event_seat</span>
-            {getTicketLimit(city, ticketType).toLocaleString("en-IN")} total seats
-          </span>
-          <span className="text-xs text-[hsl(181_100%_9%/0.4)] font-medium">
-            Max {maxTickets} per booking
-          </span>
-          */}
         </div>
 
         {/* Form card */}
