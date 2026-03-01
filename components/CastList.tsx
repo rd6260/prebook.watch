@@ -35,25 +35,25 @@ const cast: CastMember[] = [
   {
     id: "5",
     name: "Robin Das",
-    role: "",
+    role: "Raghunath",
     picture: "https://media.themoviedb.org/t/p/w300_and_h450_face/kqbdKYFZbC3bfugX2aCvQ2hq0Me.jpg",
   },
   {
     id: "6",
     name: "Pranab Prasanna Rath",
-    role: "",
+    role: "Pranakrushna",
     picture: "/cast_and_crew/pranab-prasanna-rath.png",
   },
   {
     id: "7",
     name: "Sukant Rath",
-    role: "",
+    role: "Shreeja's Father",
     picture: "https://media.themoviedb.org/t/p/w300_and_h450_face/dUb0wxZJwXKsUWHG3UIZPFnInyp.jpg",
   },
   {
     id: "8",
     name: "Kishor Kumar Swain",
-    role: "",
+    role: "Da Dha Na",
     picture: "/cast_and_crew/kishor-kumar-swain.jpeg",
   },
 ];
