@@ -31,7 +31,7 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
       {
         type: "Industry",
         label: "Industry Premiere",
-        date: "Friday, April 8",
+        date: "Wednesday, April 8",
         time: "7:30 pm onwards",
         icon: "groups",
         description:

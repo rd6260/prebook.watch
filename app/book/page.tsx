@@ -13,7 +13,7 @@ const TICKET_PRICES: Record<string, number> = {
 };
 
 const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Friday, April 11",
+  Industry: "Wednesday, April 8",
   Public: "Thursday, April 9",
   Matinee: "Thursday, April 9",
 };
