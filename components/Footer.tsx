@@ -79,6 +79,11 @@ export default function Footer() {
               ))}
             </div>
           </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.35)]">
+              A Platoon One Films Initiative
+            </span>
+          </div>
         </div>
 
         {/* Bottom bar */}
@@ -87,6 +92,7 @@ export default function Footer() {
             <span className="material-symbols-outlined text-2xl">movie_filter</span>
             <span className="text-xs font-bold">© 2026 PREBOOK.WATCH TICKETING SYSTEM</span>
           </div>
+          {/*
           <div className="flex gap-6 text-[10px] font-black uppercase text-[hsl(181_100%_9%/0.35)]">
             {["Privacy Policy", "Terms of Service", "Cookies"].map((item) => (
               <a key={item} href="#" className="hover:text-[hsl(181_100%_9%/0.7)] transition-colors">
@@ -94,6 +100,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
+          */}
         </div>
 
       </div>

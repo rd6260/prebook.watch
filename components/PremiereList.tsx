@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 // Data model
 // ---------------------------------------------------------------------------
 
-type PremiereType = "Industry" | "Public" | "Special Matinee";
+type PremiereType = "Industry" | "Public" | "Cuttack Premiere";
 
 type Premiere = {
   type: PremiereType;
@@ -31,7 +31,7 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
       {
         type: "Industry",
         label: "Industry Premiere",
-        date: "Friday, April 11",
+        date: "Friday, April 8",
         time: "7:30 pm onwards",
         icon: "groups",
         description:
@@ -52,12 +52,12 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
     displayName: "Cuttack",
     shows: [
       {
-        type: "Special Matinee",
-        label: "Special Matinee Show",
+        type: "Cuttack Premiere",
+        label: "Cuttack Premiere",
         date: "Thursday, April 9",
         time: "3:00 pm onwards",
-        icon: "",
-        description: "",
+        icon: "groups",
+        description: "A special screening with the Cast & Crew in attendance.",
       },
     ],
   },
@@ -154,7 +154,7 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
           <span className="material-symbols-outlined text-base">
             confirmation_number
           </span>
-          Book Now
+          Prebook Now
         </button>
       </div>
     </div>
