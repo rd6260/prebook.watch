@@ -47,7 +47,7 @@ const cast: CastMember[] = [
   {
     id: "7",
     name: "Sukant Rath",
-    role: "Shreeja's Father",
+    role: "Santosh Upadhyay",
     picture: "https://media.themoviedb.org/t/p/w300_and_h450_face/dUb0wxZJwXKsUWHG3UIZPFnInyp.jpg",
   },
   {
