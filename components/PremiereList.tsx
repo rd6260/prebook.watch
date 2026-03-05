@@ -34,7 +34,7 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
         date: "Thursday, April 9",
         time: "7:00 pm onwards",
         icon: "groups",
-        description: "A special screening with the Cast & Crew in attendance.",
+        description: "A special first screening with the Cast & Crew in attendance",
       },
       {
         type: "Industry",
@@ -43,7 +43,7 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
         time: "7:30 pm onwards",
         icon: "groups",
         description:
-          "Exclusive first screening with the cast, crew, and esteemed members of the film fraternity",
+          "An exclusive screening with the Cast & Crew and Esteemed Members of the Film Fraternity",
       },
     ],
   },
