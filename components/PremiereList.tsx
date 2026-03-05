@@ -29,21 +29,21 @@ const CITY_CONFIGS: Record<string, CityConfig> = {
     displayName: "Bhubaneswar",
     shows: [
       {
-        type: "Industry",
-        label: "Industry Premiere",
-        date: "Wednesday, April 8",
-        time: "7:30 pm onwards",
-        icon: "groups",
-        description:
-          "Exclusive first screening with the cast, crew, and esteemed members of the film fraternity",
-      },
-      {
         type: "Public",
         label: "Public Premiere",
         date: "Thursday, April 9",
         time: "7:00 pm onwards",
         icon: "groups",
         description: "A special screening with the Cast & Crew in attendance.",
+      },
+      {
+        type: "Industry",
+        label: "Industry Premiere",
+        date: "Friday, April 10",
+        time: "7:30 pm onwards",
+        icon: "groups",
+        description:
+          "Exclusive first screening with the cast, crew, and esteemed members of the film fraternity",
       },
     ],
   },
