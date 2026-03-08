@@ -1,88 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-// ---------------------------------------------------------------------------
-// Data model
-// ---------------------------------------------------------------------------
-
-type PremiereType = "Industry" | "Public" | "Cuttack Premiere";
-
-type Premiere = {
-  type: PremiereType;
-  label: string;
-  date: string;
-  time: string;
-  /** Icon name from Material Symbols */
-  icon: string;
-  description: string;
-};
-
-type CityConfig = {
-  /** Exact display name used in headings */
-  displayName: string;
-  shows: Premiere[];
-};
-
-const CITY_CONFIGS: Record<string, CityConfig> = {
-  bhubaneswar: {
-    displayName: "Bhubaneswar",
-    shows: [
-      {
-        type: "Public",
-        label: "Public Premiere",
-        date: "Thursday, April 9",
-        time: "7:00 pm onwards",
-        icon: "groups",
-        description: "A special first screening with the Cast & Crew in attendance",
-      },
-      {
-        type: "Industry",
-        label: "Industry Premiere",
-        date: "Friday, April 10",
-        time: "7:30 pm onwards",
-        icon: "groups",
-        description:
-          "An exclusive screening with the Cast & Crew and Esteemed Members of the Film Fraternity",
-      },
-    ],
-  },
-
-  cuttack: {
-    displayName: "Cuttack",
-    shows: [
-      {
-        type: "Cuttack Premiere",
-        label: "Cuttack Premiere",
-        date: "Thursday, April 9",
-        time: "3:00 pm onwards",
-        icon: "groups",
-        description: "A special screening with the Cast & Crew in attendance.",
-      },
-    ],
-  },
-
-  // -------------------------------------------------------------------------
-  // Add more cities here, e.g.:
-  //
-  // sambalpur: {
-  //   displayName: "Sambalpur",
-  //   shows: [ ... ],
-  // },
-  // -------------------------------------------------------------------------
-};
+import { Show, getCityByDisplayName } from "@/lib/premiere-data";
 
 // ---------------------------------------------------------------------------
 // Components
 // ---------------------------------------------------------------------------
 
 interface PremiereCardProps {
-  premiere: Premiere;
+  show: Show;
   cityName: string;
   onBook: () => void;
 }
 
-function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
+function PremiereCard({ show, cityName, onBook }: PremiereCardProps) {
   return (
     <div className="bg-white rounded-2xl border border-[hsl(181_100%_9%/0.08)] shadow-sm overflow-hidden flex flex-col">
       <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
@@ -90,14 +21,14 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
         {/* Header row: label pill + dot */}
         <div className="flex items-center justify-between mb-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.4)]">
-            {premiere.label}
+            {show.label}
           </span>
           <span className="w-2 h-2 rounded-full bg-[hsl(181_100%_9%/0.15)]" />
         </div>
 
         {/* Title */}
         <h3 className="font-black text-[hsl(181_100%_9%)] text-lg leading-tight mb-0.5">
-          Bindusagar — {premiere.label}
+          Bindusagar — {show.label}
         </h3>
         <p className="text-sm font-semibold text-[hsl(181_100%_9%/0.5)] mb-1">
           {cityName}
@@ -109,10 +40,10 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
             className="material-symbols-outlined mr-2 text-sm flex-shrink-0 text-[hsl(181_100%_9%/0.45)]"
             style={{ lineHeight: "1.4" }}
           >
-            {premiere.icon}
+            {show.icon}
           </span>
           <p className="text-xs font-semibold text-[hsl(181_100%_9%/0.45)] leading-relaxed">
-            {premiere.description}
+            {show.description}
           </p>
         </div>
 
@@ -126,7 +57,7 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
               Date
             </p>
             <p className="text-sm font-bold text-[hsl(181_100%_9%)]">
-              {premiere.date}
+              {show.date}
             </p>
           </div>
           <div className="text-right">
@@ -134,17 +65,10 @@ function PremiereCard({ premiere, cityName, onBook }: PremiereCardProps) {
               Time
             </p>
             <p className="text-sm font-bold text-[hsl(181_100%_9%)]">
-              {premiere.time}
+              {show.time}
             </p>
           </div>
         </div>
-
-        {/* Availability */}
-        {/*
-        <p className="text-xs text-[hsl(181_100%_9%/0.45)] leading-relaxed flex-1">
-          Free Seating · Seats Will Be Allotted Prior to the Event
-        </p>
-        */}
 
         {/* Book Now */}
         <button
@@ -171,10 +95,9 @@ interface PremiereListProps {
 export default function PremiereList({ cityName }: PremiereListProps) {
   const router = useRouter();
 
-  const key = cityName.trim().toLowerCase();
-  const config = CITY_CONFIGS[key];
+  const city = getCityByDisplayName(cityName);
 
-  if (!config) {
+  if (!city) {
     // Graceful fallback if city isn't configured yet
     return (
       <p className="mt-5 text-sm text-[hsl(181_100%_9%/0.5)]">
@@ -183,15 +106,13 @@ export default function PremiereList({ cityName }: PremiereListProps) {
     );
   }
 
-  function handleBook(premiere: Premiere) {
-    // Pass both type and city as URL params so the booking page
-    // never has to rely solely on localStorage.
+  function handleBook(show: Show) {
     router.push(
-      `/book?type=${encodeURIComponent(premiere.type)}&city=${encodeURIComponent(config.displayName)}`
+      `/book?type=${encodeURIComponent(show.type)}&city=${encodeURIComponent(city!.displayName)}`
     );
   }
 
-  const { displayName, shows } = config;
+  const { displayName, shows } = city;
   const isOddCount = shows.length % 2 !== 0;
 
   return (
@@ -219,7 +140,7 @@ export default function PremiereList({ cityName }: PremiereListProps) {
               className={isLastOdd ? "sm:col-span-2 sm:max-w-sm" : ""}
             >
               <PremiereCard
-                premiere={show}
+                show={show}
                 cityName={displayName}
                 onBook={() => handleBook(show)}
               />

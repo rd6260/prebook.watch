@@ -3,54 +3,27 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  type ShowType,
+  type Show,
+  type PaymentDetails,
+  type BookingStep,
+  getCityByDisplayName,
+  getShow,
+  maxTicketsForBooking,
+  formatDateTime,
+  formatPaymentMethod,
+  GLOBAL_MAX_PER_BOOKING,
+} from "@/lib/premiere-data";
 
-// ─── Config ────────────────────────────────────────────────────────────────
+// ─── Local Types ────────────────────────────────────────────────────────────
 
-const TICKET_PRICES: Record<string, number> = {
-  Industry: 400,
-  Public: 350,
-  "Cuttack Premiere": 350,
-};
-
-const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Friday, April 10",
-  Public: "Thursday, April 9",
-  "Cuttack Premiere": "Thursday, April 9",
-};
-
-/**
- * Maximum tickets available per city + show type combination.
- * Keys are lowercase: `${city.toLowerCase()}:${type.toLowerCase()}`
- */
-const TICKET_LIMITS: Record<string, number> = {
-  "bhubaneswar:industry": 300,
-  "bhubaneswar:public": 1200,
-  "cuttack:cuttack premiere": 200,
-};
-
-const GLOBAL_MAX_PER_BOOKING = 25;
-
-function getTicketLimit(city: string, type: string): number {
-  const key = `${city.trim().toLowerCase()}:${type.toLowerCase()}`;
-  return TICKET_LIMITS[key] ?? GLOBAL_MAX_PER_BOOKING;
-}
-
-// ─── Types ──────────────────────────────────────────────────────────────────
+/** Uses snake_case `ticket_count` to match the Supabase column name */
 type BookingForm = {
   name: string;
   phone: string;
   email: string;
   ticket_count: number;
-};
-
-type BookingStep = "form" | "payment" | "success";
-
-type PaymentDetails = {
-  method: string;
-  card_network: string | null;
-  bank: string | null;
-  wallet: string | null;
-  vpa: string | null;
 };
 
 type SuccessDetails = {
@@ -64,6 +37,7 @@ type SuccessDetails = {
   bookedAt: Date;
   paymentId: string;
   paymentDetails: PaymentDetails | null;
+  premiereDate: string;
 };
 
 declare global {
@@ -84,44 +58,6 @@ function loadRazorpayScript(): Promise<boolean> {
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
-}
-
-function formatDateTime(date: Date): string {
-  return date.toLocaleString("en-IN", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-}
-
-/** Turn Razorpay's raw payment data into a human-readable label + sub-label */
-function formatPaymentMethod(p: PaymentDetails): { label: string; sub: string | null } {
-  switch (p.method) {
-    case "card":
-      return { label: p.card_network ? `${p.card_network} Card` : "Card", sub: null };
-    case "upi":
-      return { label: "UPI", sub: p.vpa ?? null };
-    case "netbanking":
-      return { label: "Net Banking", sub: p.bank ?? null };
-    case "wallet":
-      return {
-        label: p.wallet
-          ? p.wallet.charAt(0).toUpperCase() + p.wallet.slice(1) + " Wallet"
-          : "Wallet",
-        sub: null,
-      };
-    case "emi":
-      return { label: "EMI", sub: p.card_network ?? null };
-    case "paylater":
-      return { label: "Pay Later", sub: null };
-    default:
-      return { label: p.method, sub: null };
-  }
 }
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
@@ -159,11 +95,10 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all ${
-          error
-            ? "border-red-300 focus:border-red-400"
-            : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
-        }`}
+        className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all ${error
+          ? "border-red-300 focus:border-red-400"
+          : "border-[hsl(181_100%_9%/0.12)] focus:border-[hsl(181_100%_9%/0.3)]"
+          }`}
       />
       {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
     </div>
@@ -174,6 +109,7 @@ function InputField({
 function PaymentModal({
   ticketType,
   ticketCount,
+  pricePerTicket,
   bookingId,
   phone,
   email,
@@ -182,13 +118,13 @@ function PaymentModal({
 }: {
   ticketType: string;
   ticketCount: number;
+  pricePerTicket: number;
   bookingId: string;
   phone: string;
   email: string;
   onSuccess: (paymentId: string) => void;
   onClose: () => void;
 }) {
-  const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
   const totalAmount = pricePerTicket * ticketCount;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -338,7 +274,7 @@ function PaymentModal({
 
 // ─── Success Screen ──────────────────────────────────────────────────────────
 function SuccessScreen({ details }: { details: SuccessDetails }) {
-  const premiereDate = PREMIERE_DATES[details.ticketType] ?? "—";
+  const premiereDate = details.premiereDate;
   const paymentLabel = details.paymentDetails
     ? formatPaymentMethod(details.paymentDetails)
     : null;
@@ -396,14 +332,14 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
       }
 
       const rows = [
-        { label: "NAME",          val: details.name },
-        { label: "EMAIL",         val: details.email },
-        { label: "MOBILE",        val: `+91 ${details.phone}` },
-        { label: "CITY",          val: details.city },
+        { label: "NAME", val: details.name },
+        { label: "EMAIL", val: details.email },
+        { label: "MOBILE", val: `+91 ${details.phone}` },
+        { label: "CITY", val: details.city },
         { label: "PREMIERE DATE", val: premiereDate },
-        { label: "TICKETS",       val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
-        { label: "TICKET TYPE",   val: details.ticketType },
-        { label: "BOOKED AT",     val: formatDateTime(details.bookedAt) },
+        { label: "TICKETS", val: `${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}` },
+        { label: "TICKET TYPE", val: details.ticketType },
+        { label: "BOOKED AT", val: formatDateTime(details.bookedAt) },
       ];
 
       const HEADER_H = 110;
@@ -538,7 +474,7 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
           </div>
           <h1 className="font-black text-[hsl(181_100%_9%)] text-2xl mb-1">Booking Confirmed!</h1>
           <p className="text-sm text-[hsl(181_100%_9%/0.5)] leading-relaxed">
-            Your tickets have been booked successfully. A confirmation will be sent to your registered contact.
+            Your tickets have been booked successfully. A confirmation email will be sent to your registered contact.
           </p>
         </div>
 
@@ -554,14 +490,14 @@ function SuccessScreen({ details }: { details: SuccessDetails }) {
           </div>
 
           <div className="px-5 pt-1 pb-2">
-            <Row icon="person"              label="Name"              value={details.name} />
-            <Row icon="mail"                label="Email"             value={details.email} />
-            <Row icon="smartphone"          label="Mobile"            value={`+91 ${details.phone}`} />
-            <Row icon="location_on"         label="City"              value={details.city} />
-            <Row icon="event"               label="Premiere Date"     value={premiereDate} />
+            <Row icon="person" label="Name" value={details.name} />
+            <Row icon="mail" label="Email" value={details.email} />
+            <Row icon="smartphone" label="Mobile" value={`+91 ${details.phone}`} />
+            <Row icon="location_on" label="City" value={details.city} />
+            <Row icon="event" label="Premiere Date" value={premiereDate} />
             <Row icon="confirmation_number" label="Number of Tickets" value={`${details.ticketCount} ticket${details.ticketCount > 1 ? "s" : ""}`} />
-            <Row icon="movie"               label="Ticket Type"       value={details.ticketType} />
-            <Row icon="schedule"            label="Booked At"         value={formatDateTime(details.bookedAt)} />
+            <Row icon="movie" label="Ticket Type" value={details.ticketType} />
+            <Row icon="schedule" label="Booked At" value={formatDateTime(details.bookedAt)} />
           </div>
 
           <div className="mx-4 mb-4 rounded-xl bg-[hsl(181_100%_9%/0.04)] border border-[hsl(181_100%_9%/0.08)] px-4 py-3.5 flex items-center justify-between gap-3">
@@ -629,7 +565,7 @@ function BookingPageInner() {
   const router = useRouter();
 
   // type comes from URL always
-  const ticketType = (searchParams.get("type") ?? "Public") as "Public" | "Industry" | "Cuttack Premiere";
+  const ticketType = (searchParams.get("type") ?? "Public") as ShowType;
 
   // city: prefer URL param, fall back to localStorage
   const cityFromUrl = searchParams.get("city");
@@ -651,9 +587,13 @@ function BookingPageInner() {
 
   const supabase = createClient();
 
-  const pricePerTicket = TICKET_PRICES[ticketType] ?? 350;
+  // Resolve the show from the central data
+  const cityData = city ? getCityByDisplayName(city) : undefined;
+  const show: Show | undefined = cityData ? cityData.shows.find(s => s.type === ticketType) : undefined;
 
-  const maxTickets = city ? Math.min(getTicketLimit(city, ticketType), GLOBAL_MAX_PER_BOOKING) : GLOBAL_MAX_PER_BOOKING;
+  const pricePerTicket = show?.pricePerTicket ?? 350;
+
+  const maxTickets = show ? maxTicketsForBooking(show) : GLOBAL_MAX_PER_BOOKING;
 
   const [form, setForm] = useState<BookingForm>({
     name: "",
@@ -735,6 +675,7 @@ function BookingPageInner() {
       bookedAt,
       paymentId,
       paymentDetails,
+      premiereDate: show?.date ?? "—",
     });
     setStep("success");
 
@@ -758,11 +699,11 @@ function BookingPageInner() {
         paymentMethod: paymentDetails ? (() => {
           const p = paymentDetails!;
           switch (p.method) {
-            case "card":       return p.card_network ? `${p.card_network} Card` : "Card";
-            case "upi":        return p.vpa ? `UPI (${p.vpa})` : "UPI";
+            case "card": return p.card_network ? `${p.card_network} Card` : "Card";
+            case "upi": return p.vpa ? `UPI (${p.vpa})` : "UPI";
             case "netbanking": return p.bank ? `Net Banking (${p.bank})` : "Net Banking";
-            case "wallet":     return p.wallet ? `${p.wallet} Wallet` : "Wallet";
-            default:           return p.method;
+            case "wallet": return p.wallet ? `${p.wallet} Wallet` : "Wallet";
+            default: return p.method;
           }
         })() : null,
       }),
@@ -889,6 +830,7 @@ function BookingPageInner() {
         <PaymentModal
           ticketType={ticketType}
           ticketCount={form.ticket_count}
+          pricePerTicket={pricePerTicket}
           bookingId={bookingId}
           phone={form.phone}
           email={form.email}

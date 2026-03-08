@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 const RECIPIENT_EMAILS = [
   "rohandas.zero@gmail.com",
   "spide611@gmail.com",
+  "team@platoon.one"
 ];
 
 // ─── Subject labels ───────────────────────────────────────────────────────────

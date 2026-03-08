@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCityByDisplayName } from "@/lib/premiere-data";
 
 const POSTMARK_API_URL = "https://api.postmarkapp.com/email";
 
@@ -16,25 +17,19 @@ type EmailPayload = {
   premiereDate: string;
 };
 
-const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Friday, April 10",
-  Public: "Thursday, April 9",
-  "Cuttack Premiere": "Thursday, April 9",
-};
-
 function buildHtml(p: EmailPayload): string {
   const rows = [
-    { label: "Name",             value: p.name },
-    { label: "Email",            value: p.email },
-    { label: "Mobile",           value: `+91 ${p.phone}` },
-    { label: "City",             value: p.city },
-    { label: "Premiere Date",    value: p.premiereDate },
-    { label: "Ticket Type",      value: p.ticketType },
-    { label: "No. of Tickets",   value: `${p.ticketCount} ticket${p.ticketCount > 1 ? "s" : ""}` },
-    { label: "Amount Paid",      value: `₹${p.totalAmount.toLocaleString("en-IN")}` },
-    { label: "Payment Mode",     value: p.paymentMethod ?? "Online" },
-    { label: "Payment ID",       value: p.paymentId },
-    { label: "Booked At",        value: p.bookedAt },
+    { label: "Name", value: p.name },
+    { label: "Email", value: p.email },
+    { label: "Mobile", value: `+91 ${p.phone}` },
+    { label: "City", value: p.city },
+    { label: "Premiere Date", value: p.premiereDate },
+    { label: "Ticket Type", value: p.ticketType },
+    { label: "No. of Tickets", value: `${p.ticketCount} ticket${p.ticketCount > 1 ? "s" : ""}` },
+    { label: "Amount Paid", value: `₹${p.totalAmount.toLocaleString("en-IN")}` },
+    { label: "Payment Mode", value: p.paymentMethod ?? "Online" },
+    { label: "Payment ID", value: p.paymentId },
+    { label: "Booked At", value: p.bookedAt },
   ];
 
   const rowsHtml = rows
@@ -167,7 +162,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const premiereDate = PREMIERE_DATES[ticketType] ?? "—";
+    const cityData = getCityByDisplayName(city ?? "");
+    const showData = cityData?.shows.find(s => s.type === ticketType);
+    const premiereDate = showData?.date ?? "—";
 
     const payload: EmailPayload = {
       name,
