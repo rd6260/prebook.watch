@@ -13,7 +13,7 @@ const TICKET_PRICES: Record<string, number> = {
 };
 
 const PREMIERE_DATES: Record<string, string> = {
-  Industry: "Wednesday, April 8",
+  Industry: "Friday, April 10",
   Public: "Thursday, April 9",
   "Cuttack Premiere": "Thursday, April 9",
 };
