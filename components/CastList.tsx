@@ -24,7 +24,7 @@ const cast: CastMember[] = [
     id: "3",
     name: "Sonalli Sharmisstha",
     role: "Kaberi",
-    picture: "/cast_and_crew/sonalli-sharmisstha.png",
+    picture: "https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/cast_and_crew/sonalli-sharmisstha.png",
   },
   {
     id: "4",
@@ -42,7 +42,7 @@ const cast: CastMember[] = [
     id: "6",
     name: "Pranab Prasanna Rath",
     role: "Pranakrushna",
-    picture: "/cast_and_crew/pranab-prasanna-rath.png",
+    picture: "https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/cast_and_crew/pranab-prasanna-rath.png",
   },
   {
     id: "7",
@@ -54,7 +54,7 @@ const cast: CastMember[] = [
     id: "8",
     name: "Kishor Kumar Swain",
     role: "Da Dha Na",
-    picture: "/cast_and_crew/kishor-kumar-swain.jpeg",
+    picture: "https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/cast_and_crew/kishor-kumar-swain.jpeg",
   },
 ];
 

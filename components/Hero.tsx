@@ -45,7 +45,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
             <video
               ref={mobileVideoRef}
               className="absolute pointer-events-none w-full h-full object-cover"
-              src="/videos/bindusagar_teaser_4_5.webm"
+              src="https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/videos/bindusagar_teaser_4_5.webm"
               autoPlay
               muted
               loop
@@ -104,7 +104,7 @@ export default function Hero({ onBookNow, onScrollToCinemaList }: HeroProps) {
         <video
           ref={desktopVideoRef}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          src="/videos/bindusagar_teaser_16_9.webm"
+          src="https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/videos/bindusagar_teaser_16_9.webm"
           autoPlay
           muted
           loop
