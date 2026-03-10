@@ -29,7 +29,7 @@ const reels: Reel[] = [
     title: "Changa Re | Full Video",
     genre: "",
     releaseLabel: "",
-    poster: "https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/reel_thumbnails/changa_re.jpeg",
+    poster: "https://cdn.jsdelivr.net/gh/rd6260/prebook.watch@main/public/reel_thumbnails/changa_re_thumbnail.jpeg",
     duration: "",
     badge: "",
     badgeColor: "bg-red-500 text-white",
