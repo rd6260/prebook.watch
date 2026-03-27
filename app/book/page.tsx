@@ -110,6 +110,7 @@ function PaymentModal({
   ticketType,
   ticketCount,
   pricePerTicket,
+  discount = 0,
   bookingId,
   phone,
   email,
@@ -119,13 +120,14 @@ function PaymentModal({
   ticketType: string;
   ticketCount: number;
   pricePerTicket: number;
+  discount?: number;
   bookingId: string;
   phone: string;
   email: string;
   onSuccess: (paymentId: string) => void;
   onClose: () => void;
 }) {
-  const totalAmount = pricePerTicket * ticketCount;
+  const totalAmount = pricePerTicket * ticketCount - discount;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -220,6 +222,15 @@ function PaymentModal({
                 ₹{pricePerTicket} × {ticketCount}
               </span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-emerald-600 font-medium flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">local_offer</span>
+                  Coupon Discount
+                </span>
+                <span className="font-bold text-emerald-600">− ₹{discount}</span>
+              </div>
+            )}
             <div className="h-px bg-[hsl(181_100%_9%/0.08)]" />
             <div className="flex justify-between">
               <span className="font-black text-[hsl(181_100%_9%)] text-base">Total</span>
@@ -608,6 +619,27 @@ function BookingPageInner() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
+  // ── Coupon (Cuttack only) ──────────────────────────────────────────────────
+  const COUPON_CODE = "KATAK51";
+  const COUPON_DISCOUNT = 51;
+  const isCuttack = city === "Cuttack";
+  const [hasCoupon, setHasCoupon] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const discount = isCuttack && couponApplied ? COUPON_DISCOUNT : 0;
+
+  function applyCoupon() {
+    if (couponInput.trim().toUpperCase() === COUPON_CODE) {
+      setCouponApplied(true);
+      setCouponError("");
+    } else {
+      setCouponApplied(false);
+      setCouponError("Invalid coupon code");
+    }
+  }
+
   function validate(): boolean {
     const e: Partial<Record<keyof BookingForm, string>> = {};
     if (!form.name.trim()) e.name = "Name is required";
@@ -662,7 +694,7 @@ function BookingPageInner() {
     }
 
     const bookedAt = new Date();
-    const totalAmount = pricePerTicket * form.ticket_count;
+    const totalAmount = pricePerTicket * form.ticket_count - discount;
 
     setSuccessDetails({
       name: form.name.trim(),
@@ -787,6 +819,90 @@ function BookingPageInner() {
                   <p className="text-xs text-red-500 font-medium">{errors.ticket_count as string}</p>
                 )}
               </div>
+
+              {/* Coupon code — Cuttack only */}
+              {isCuttack && (
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+                    <input
+                      type="checkbox"
+                      checked={hasCoupon}
+                      onChange={(e) => {
+                        setHasCoupon(e.target.checked);
+                        if (!e.target.checked) {
+                          setCouponInput("");
+                          setCouponApplied(false);
+                          setCouponError("");
+                        }
+                      }}
+                      className="w-4 h-4 rounded accent-[hsl(181_100%_9%)] cursor-pointer"
+                    />
+                    <span className="text-[11px] font-black uppercase tracking-widest text-[hsl(181_100%_9%/0.55)]">
+                      I have a discount coupon
+                    </span>
+                  </label>
+
+                  {hasCoupon && (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value);
+                            setCouponApplied(false);
+                            setCouponError("");
+                          }}
+                          placeholder="Enter coupon code"
+                          className="flex-1 px-4 py-2.5 rounded-xl border border-[hsl(181_100%_9%/0.12)] text-sm font-semibold text-[hsl(181_100%_9%)] placeholder:text-[hsl(181_100%_9%/0.25)] bg-white focus:outline-none focus:ring-2 focus:ring-[hsl(181_100%_9%/0.15)] transition-all uppercase"
+                        />
+                        <button
+                          type="button"
+                          onClick={applyCoupon}
+                          className="px-4 py-2.5 rounded-xl bg-[hsl(181_100%_9%)] text-white text-sm font-bold hover:bg-[hsl(181_100%_12%)] active:scale-95 transition-all"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponApplied && (
+                        <p className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-sm">check_circle</span>
+                          Coupon applied! ₹{COUPON_DISCOUNT} off
+                        </p>
+                      )}
+                      {couponError && (
+                        <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-sm">error</span>
+                          {couponError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Total payable after coupon */}
+              {couponApplied && discount > 0 && (
+                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700/70 mb-0.5">
+                      Total Payable
+                    </p>
+                    <p className="text-lg font-black text-emerald-700">
+                      ₹{(form.ticket_count * pricePerTicket - discount).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700/60 mb-0.5 line-through">
+                      ₹{(form.ticket_count * pricePerTicket).toLocaleString("en-IN")}
+                    </p>
+                    <span className="inline-flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                      <span className="material-symbols-outlined text-xs">local_offer</span>
+                      ₹{discount} off
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -831,6 +947,7 @@ function BookingPageInner() {
           ticketType={ticketType}
           ticketCount={form.ticket_count}
           pricePerTicket={pricePerTicket}
+          discount={discount}
           bookingId={bookingId}
           phone={form.phone}
           email={form.email}
