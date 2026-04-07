@@ -1,7 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Show, getCityByDisplayName } from "@/lib/premiere-data";
+
+// ---------------------------------------------------------------------------
+// Booking Block Config – set to false to re-enable normal booking
+// ---------------------------------------------------------------------------
+const BOOKING_BLOCKED = true;
+const BOOKING_BLOCKED_MESSAGE =
+  "Booking is temporarily unavailable. Please try again later.";
 
 // ---------------------------------------------------------------------------
 // Components
@@ -94,6 +102,7 @@ interface PremiereListProps {
 
 export default function PremiereList({ cityName }: PremiereListProps) {
   const router = useRouter();
+  const [showBlockedPopup, setShowBlockedPopup] = useState(false);
 
   const city = getCityByDisplayName(cityName);
 
@@ -107,6 +116,10 @@ export default function PremiereList({ cityName }: PremiereListProps) {
   }
 
   function handleBook(show: Show) {
+    if (BOOKING_BLOCKED) {
+      setShowBlockedPopup(true);
+      return;
+    }
     router.push(
       `/book?type=${encodeURIComponent(show.type)}&city=${encodeURIComponent(city!.displayName)}`
     );
@@ -117,6 +130,35 @@ export default function PremiereList({ cityName }: PremiereListProps) {
 
   return (
     <div className="mt-5 w-full max-w-7xl mx-auto sm:px-2">
+
+      {/* ── Booking‑blocked popup overlay ── */}
+      {showBlockedPopup && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowBlockedPopup(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl mx-4 max-w-sm w-full p-6 text-center animate-[popIn_0.25s_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="material-symbols-outlined text-4xl text-[hsl(181_100%_9%/0.6)] mb-3 block">
+              event_busy
+            </span>
+            <h3 className="text-lg font-black text-[hsl(181_100%_9%)] mb-2">
+              Please try later
+            </h3>
+            <p className="text-sm text-[hsl(181_100%_9%/0.6)] leading-relaxed mb-5">
+              {BOOKING_BLOCKED_MESSAGE}
+            </p>
+            <button
+              onClick={() => setShowBlockedPopup(false)}
+              className="w-full py-2.5 rounded-xl font-bold text-sm bg-[hsl(181_100%_9%)] text-white hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] transition-all"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Section heading */}
       <div className="flex items-center justify-between mb-4">
