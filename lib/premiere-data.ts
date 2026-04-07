@@ -4,7 +4,7 @@
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export type ShowType = "Industry" | "Public" | "Cuttack Premiere";
+export type ShowType = "Public" | "Cuttack Premiere";
 
 export type ShowStatus = "available" | "soldout" | "cancelled";
 
@@ -13,7 +13,7 @@ export type ShowStatus = "available" | "soldout" | "cancelled";
 export type Show = {
   /** Unique within a city; used as URL param */
   type: ShowType;
-  /** Human-readable label, e.g. "Industry Premiere" */
+  /** Human-readable label, e.g. "Public Premiere" */
   label: string;
   /** Display date string, e.g. "Wednesday, April 8" */
   date: string;
@@ -91,26 +91,13 @@ export const CITIES: City[] = [
       {
         type: "Public",
         label: "Public Premiere",
-        date: "Thursday, April 9",
-        isoDate: "2025-04-09",
+        date: "Sunday, April 12",
+        isoDate: "2026-04-12",
         time: "7:00 pm onwards",
         icon: "groups",
         description: "A special first screening with the Cast & Crew in attendance",
         pricePerTicket: 350,
         totalSeats: 1200,
-        status: "available",
-      },
-      {
-        type: "Industry",
-        label: "Industry Premiere",
-        date: "Friday, April 10",
-        isoDate: "2025-04-10",
-        time: "7:30 pm onwards",
-        icon: "groups",
-        description:
-          "An exclusive screening with the Cast & Crew and Esteemed Members of the Film Fraternity",
-        pricePerTicket: 400,
-        totalSeats: 300,
         status: "available",
       },
     ],
@@ -122,8 +109,8 @@ export const CITIES: City[] = [
       {
         type: "Cuttack Premiere",
         label: "Cuttack Premiere",
-        date: "Thursday, April 9",
-        isoDate: "2025-04-09",
+        date: "Sunday, April 12",
+        isoDate: "2026-04-12",
         time: "3:00 pm onwards",
         icon: "groups",
         description: "A special screening with the Cast & Crew in attendance.",
