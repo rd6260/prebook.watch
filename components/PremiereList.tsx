@@ -7,7 +7,7 @@ import { Show, getCityByDisplayName } from "@/lib/premiere-data";
 // ---------------------------------------------------------------------------
 // Booking Block Config – set to false to re-enable normal booking
 // ---------------------------------------------------------------------------
-const BOOKING_BLOCKED = true;
+const BOOKING_BLOCKED = false;
 const BOOKING_BLOCKED_MESSAGE =
   "Booking is temporarily unavailable. Please try again later.";
 
