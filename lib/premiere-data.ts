@@ -29,6 +29,8 @@ export type Show = {
   pricePerTicket: number;
   /** Total seats available for this show */
   totalSeats: number;
+  /** Venue of the premiere */
+  venue?: string;
   /** Operational status */
   status: ShowStatus;
 };
@@ -98,6 +100,7 @@ export const CITIES: City[] = [
         description: "A special first screening with the Cast & Crew in attendance",
         pricePerTicket: 350,
         totalSeats: 1200,
+        venue: "Cinepolis Nexus Esplanade",
         status: "available",
       },
     ],
@@ -116,6 +119,7 @@ export const CITIES: City[] = [
         description: "A special screening with the Cast & Crew in attendance.",
         pricePerTicket: 350,
         totalSeats: 200,
+        venue: "INOX SGBL Square Mall",
         status: "available",
       },
     ],

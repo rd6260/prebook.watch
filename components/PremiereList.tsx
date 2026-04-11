@@ -78,6 +78,18 @@ function PremiereCard({ show, cityName, onBook }: PremiereCardProps) {
           </div>
         </div>
 
+        {/* Venue */}
+        {show.venue && (
+          <div className="mb-4">
+            <p className="text-[10px] font-black uppercase tracking-wider text-[hsl(181_100%_9%/0.35)] mb-1">
+              Venue
+            </p>
+            <p className="text-sm font-bold text-[hsl(181_100%_9%)]">
+              {show.venue}
+            </p>
+          </div>
+        )}
+
         {/* Book Now */}
         <button
           onClick={onBook}
