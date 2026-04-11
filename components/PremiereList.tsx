@@ -96,11 +96,10 @@ function PremiereCard({ show, cityName, isSoldOut, onBook }: PremiereCardProps) 
         <button
           onClick={onBook}
           disabled={isSoldOut}
-          className={`mt-5 w-full py-3 rounded-xl font-bold text-sm text-white transition-all flex items-center justify-center gap-2 shadow-md ${
-            isSoldOut
+          className={`mt-5 w-full py-3 rounded-xl font-bold text-sm text-white transition-all flex items-center justify-center gap-2 shadow-md ${isSoldOut
               ? "bg-[hsl(181_100%_9%/0.4)] cursor-not-allowed shadow-none"
               : "bg-[hsl(181_100%_9%)] hover:bg-[hsl(181_100%_12%)] active:scale-[0.98] shadow-[hsl(181_100%_9%/0.15)]"
-          }`}
+            }`}
         >
           <span className="material-symbols-outlined text-base">
             {isSoldOut ? "block" : "confirmation_number"}
@@ -129,14 +128,18 @@ export default function PremiereList({ cityName }: PremiereListProps) {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('bookings')
-        .select('ticket_type, ticket_count')
+        .select('city, ticket_count')
         .eq('is_paid', true);
 
       if (data && !error) {
         const counts: Record<string, number> = {};
         for (const row of data) {
-          counts[row.ticket_type] = (counts[row.ticket_type] || 0) + row.ticket_count;
+          counts[row.city] = (counts[row.city] || 0) + row.ticket_count;
         }
+        // console.log(counts);
+        // counts["Bhubaneswar"] = 98;
+        // counts["Cuttack"] = 180;
+        // console.log(counts);
         setBookedCounts(counts);
       }
     }
@@ -223,7 +226,7 @@ export default function PremiereList({ cityName }: PremiereListProps) {
               <PremiereCard
                 show={show}
                 cityName={displayName}
-                isSoldOut={show.status === "soldout" || (bookedCounts[show.type] || 0) >= show.totalSeats}
+                isSoldOut={show.status === "soldout" || (bookedCounts[displayName] || 0) >= show.totalSeats}
                 onBook={() => handleBook(show)}
               />
             </div>
